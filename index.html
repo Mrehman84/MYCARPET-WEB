@@ -80,14 +80,13 @@
     </aside>
 
     <main class="main-container">
-        <!-- ================= TAB 1: DASHBOARD UTAMA (DIKEMBALIKAN) ================= -->
+        <!-- ================= TAB 1: DASHBOARD UTAMA ================= -->
         <section id="dashboard" class="tab-content">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h2 class="section-title">Dashboard Utama</h2>
-                    <p class="section-desc">Paparan data status operasi semasa dan ringkasan jualan masa nyata.</p>
+                    <p class="section-desc">Paparan data status operasi semasa syarikat.</p>
                 </div>
-                <button class="st-button" onclick="simulateDataUpdate()">🔄 Kemaskini Data</button>
             </div>
             
             <h3 class="group-title">🛠️ Status Operasi Karpet Semasa</h3>
@@ -104,12 +103,6 @@
                 <div class="st-metric-card"><span class="st-metric-label">Tahun Ini</span><span id="val-tahun" class="st-metric-value">2,104 helai</span><span class="st-metric-delta positive">▲ +8.5% peningkatan tahunan</span></div>
                 <div class="st-metric-card"><span class="st-metric-label">Sepanjang Waktu</span><span id="val-sepanjang" class="st-metric-value">5,840 helai</span><span class="st-metric-delta" style="color: var(--gray-text);">Sejak Jan 2024</span></div>
             </div>
-
-            <h3 class="group-title">💰 Prestasi Kewangan & Jualan</h3>
-            <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                <div class="st-metric-card" style="border-left: 4px solid var(--primary-red);"><span class="st-metric-label">Jumlah Jualan Bulan Ini</span><span id="val-jualan" class="st-metric-value" style="color: var(--primary-red);">RM 14,850.00</span><span class="st-metric-delta positive">▲ KPI Terlampau</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Purata Nilai Setiap Tempahan</span><span id="val-purata" class="st-metric-value">RM 75.38</span><span class="st-metric-delta positive">▲ +3.4% naik</span></div>
-            </div>
         </section>
 
         <!-- ================= TAB 2: TEMPAHAN BARU ================= -->
@@ -125,7 +118,7 @@
                 <div class="form-group" id="box-p-sedia-ada">
                     <label class="form-label">Cari Pelanggan Sedia Ada (Dari Google Sheets)</label>
                     <select id="select-pelanggan" onchange="autoFillPelanggan()">
-                        <option value="">-- Memuatkan Senarai Pelanggan... --</option>
+                        <option value="">-- Sila Pilih Pelanggan --</option>
                     </select>
                 </div>
 
@@ -154,7 +147,7 @@
         </section>
 
         <!-- PLACEHOLDERS TAB LAIN -->
-        <section id="scan-tracking" class="tab-content hidden"><h2>🔍 Scan & Tracking QR Code</h2><div class="st-form"><div class="form-group"><label class="form-label">Masukkan QR ID / No Invois:</label><input type="text" id="input-qr-search" class="st-input" placeholder="INV2670001-1" style="max-width:400px; display:inline-block; margin-right:10px;"><button class="st-button" onclick="cariStatusKarpetFizikal()">🔍 Cari</button></div><div id="container-status-badge" style="margin-top:20px;"></div></div></section>
+        <section id="scan-tracking" class="tab-content hidden"><h2>🔍 Scan & Tracking QR Code</h2><p>Modul siap sedia.</p></section>
         <section id="janji-temu" class="tab-content hidden"><h2>📅 Jadual & Janji Temu</h2><p>Modul siap sedia.</p></section>
         <section id="pembayaran" class="tab-content hidden"><h2>💳 Transaksi & Pembayaran</h2><p>Modul siap sedia.</p></section>
         <section id="invois" class="tab-content hidden"><h2>🧾 Penjanaan Invois</h2><p>Modul siap sedia.</p></section>
@@ -168,22 +161,23 @@
         let dataPelangganGlobal = [];
         let dataKatalogHargaGlobal = [];
 
+        // Hubungkan data serta-merta sewaktu website dibuka tanpa sekatan ralat
         window.onload = function() {
             muatDataKatalogHarga();
             muatDataPelangganSediaAda();
         };
 
-        // BAIKI BUG TAB: Menghilangkan pepijat tersangkut semasa klik menu sidebar
+        // KOD TETAPAN TAB YANG BARU DAN SELAMAT (Membuang ralat event.currentTarget)
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             
             const activeTab = document.getElementById(tabId);
             if (activeTab) activeTab.classList.remove('hidden');
             
-            document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
-            
-            // Mencari elemen butang dengan lebih selamat menggunakan gelung standard
             const menuButtons = document.querySelectorAll('.menu-item');
+            menuButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Padanan butang menggunakan gelung standard untuk keselamatan
             for (let i = 0; i < menuButtons.length; i++) {
                 if (menuButtons[i].getAttribute('onclick').includes(tabId)) {
                     menuButtons[i].classList.add('active');
@@ -199,8 +193,6 @@
                 dataKatalogHargaGlobal = data;
                 const select = document.getElementById('pilihan-karpet');
                 select.innerHTML = "";
-                
-                // MENGGUNAKAN INDEKS ANGKA (i) SAHAJA: 100% Selesai Isu RM NaN & Tanda Petik
                 data.forEach((item, i) => {
                     select.innerHTML += `<option value="${i}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
                 });
@@ -314,32 +306,6 @@
                 btn.innerText = "🚀 Simpan Tempahan"; btn.disabled = false;
             });
         }
-
-        function cariStatusKarpetFizikal() {
-            const searchId = document.getElementById('input-qr-search').value.trim().toUpperCase();
-            const container = document.getElementById('container-status-badge');
-            
-            if(!searchId) return;
-            container.innerHTML = "⏳ Mencari...";
-            
-            setTimeout(() => {
-                let mockStatus = "DALAM PROSES";
-                if(searchId.includes("-2")) mockStatus = "PENGERINGAN";
-                if(searchId.includes("-3")) mockStatus = "READY TO DELIVER";
-                
-                container.innerHTML = "";
-                if (mockStatus === "DALAM PROSES") {
-                    container.innerHTML = `<div style="background-color: #1e293b; color: #38bdf8; padding: 12px 16px; border-radius: 6px; border-left: 5px solid #0ea5e9; font-size:14px;">🆔 <b>${searchId}</b> | 🔄 Status Semasa: <b style="color: #0ea5e9;">${mockStatus}</b></div>`;
-                } else if (mockStatus === "PENGERINGAN" || mockStatus === "READY TO DELIVER") {
-                    container.innerHTML = `<div style="background-color: #2e2511; color: #fbbf24; padding: 12px 16px; border-radius: 6px; border-left: 5px solid #eab308; font-size:14px;">🆔 <b>${searchId}</b> | 🔄 Status Semasa: <b style="color: #eab308;">${mockStatus}</b></div>`;
-                }
-            }, 500);
-        }
-
-        function simulateDataUpdate() {
-            alert("Data metrik sedia disinkronisasikan.");
-        }
     </script>
 </body>
 </html>
-
