@@ -60,7 +60,7 @@
 <body>
     <aside class="sidebar">
         <div class="sidebar-header">
-            <h1 class="sidebar-title">✨ MYCARPET PRO <span style="color: var(--primary-red);">v3.1</span></h1>
+            <h1 class="sidebar-title">✨ MYCARPET PRO <span style="color: var(--primary-red);">v3.2</span></h1>
             <p class="sidebar-subtitle">Sistem Pengurusan & Operasi</p>
         </div>
         <nav>
@@ -162,24 +162,28 @@
         <section id="kewangan" class="tab-content hidden"><h2>💰 Prestasi & Analitis Kewangan</h2><p>Modul siap sedia.</p></section>
     </main>
     <script>
-        // 🛠️ PAUTAN API TERKINI YANG TELAH DISATUKAN DENGAN BETUL
-        const API_URL = "https://script.google.com/macros/s/AKfycbwN10vU77K54mrehccl7qIrIS37z79HcvDh0dFZ9DbIGAvuMVhYHurrF1zXQx-hA56-/exec";
+        // Sila pastikan URL di bawah adalah URL Apps Script Exec abang yang betul
+        const API_URL = "https://script.google.com/macros/library/d/191KEBjOKt_8w1Dtvw97Hr8fI-6-hkhsowMTMtkuZZ85SSJdqPcKhDK7R/4";
         let senaraiMembeli = [];
         let dataPelangganGlobal = [];
         let dataKatalogHargaGlobal = [];
 
+        // Memanggil data menggunakan kaedah JSONP kalis sekatan browser sebaik sahaja laman web dibuka
         window.onload = function() {
             panggilDataJSONP("get_harga", "terimaKatalogHarga");
             panggilDataJSONP("get_pelanggan", "terimaDataPelanggan");
         };
 
+        // Fungsi khas menembus sekatan CORS browser secara percuma
         function panggilDataJSONP(action, callbackName) {
             const script = document.createElement("script");
             script.src = `${API_URL}?action=${action}&callback=${callbackName}`;
             document.body.appendChild(script);
+            // Padam semula tag script selepas dimuatkan untuk kebersihan kod
             script.onload = () => script.remove();
         }
 
+        // Fungsi penerima data katalog dari Sheets
         function terimaKatalogHarga(data) {
             dataKatalogHargaGlobal = data;
             const select = document.getElementById('pilihan-karpet');
@@ -189,6 +193,7 @@
             });
         }
 
+        // Fungsi penerima data pelanggan dari Sheets
         function terimaDataPelanggan(data) {
             dataPelangganGlobal = data;
             const select = document.getElementById('select-pelanggan');
