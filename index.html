@@ -82,97 +82,6 @@
         <section id="dashboard" class="tab-content">
             <h2 class="section-title">Dashboard Utama</h2>
             <div class="metrics-grid">
-                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span class="st-metric-value">18</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span class="st-metric-value">12</span></div>
-            </div>
-        </section>
-
-        <!-- ================= TAB 2: TEMPAHAN BARU ================= -->
-        <section id="tempahan-baru" class="tab-content hidden">
-            <h2 class="section-title">➕ Daftar Tempahan Baru</h2>
-            <div class="st-form">
-                <div class="form-group">
-                    <label class="form-label">Status Pendaftaran Pelanggan</label>
-                    <input type="radio" name="status-p" value="Sedia Ada" checked onclick="tukarStatusPelanggan('Sedia Ada')"> Pelanggan Sedia Ada
-                    <input type="radio" name="status-p" value="Baru" onclick="tukarStatusPelanggan('Baru')"> Pelanggan Baru
-                </div>
-
-                <div class="form-group" id="box-p-sedia-ada">
-                    <label class="form-label">Cari Pelanggan Sedia Ada (Dari Google Sheets)</label>
-                    <select id="select-pelanggan" onchange="autoFillPelanggan()">
-                        <option value="">-- Memuatkan Senarai Pelanggan... --</option>
-                    </select>
-                </div>
-
-                <div class="form-group"><label class="form-label">Nama Pelanggan</label><input type="text" id="cust-nama" class="st-input" placeholder="Nama penuh"></div>
-                <div class="form-group"><label class="form-label">No. Telefon</label><input type="text" id="cust-tel" class="st-input" placeholder="Contoh: 0123456789"></div>
-                <div class="form-group"><label class="form-label">Alamat Rumah Penghantaran</label><input type="text" id="cust-alamat" class="st-input" placeholder="Alamat lengkap"></div>
-                
-                <hr style="border:0; border-top:1px solid var(--border-color); margin:1.5rem 0;">
-                
-                <!-- DROPDOWN DINAMIK MENARIK REKOD TAB SENARAI_HARGA -->
-                <div class="form-group">
-                    <label class="form-label">Pilihan Jenis & Kod Karpet (Tarik Real-Time Dari Sheet)</label>
-                    <select id="pilihan-karpet">
-                        <option value="">-- Memuatkan Senarai Katalog... --</option>
-                    </select>
-                </div>
-                <div class="form-group"><label class="form-label">Kuantiti (Helai)</label><input type="number" id="item-qty" class="st-input" value="1" min="1"></div>
-                <button class="st-button" type="button" onclick="tambahItemKeSenarai()" style="background-color:#31333f;">➕ Tambah Item</button>
-                
-                <table class="st-table" id="jadual-item">
-                    <thead><tr><th>Kod</th><th>Jenis Perkhidmatan</th><th>Harga Seunit</th><th>Kuantiti</th><th>Jumlah</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-                <div style="margin-top:1.5rem; text-align:right; font-size:1.1rem; font-weight:700;">Jumlah Keseluruhan: <span id="total-harga-skrin" style="color:var(--primary-red);">RM 0.00</span></div>
-                <div style="margin-top: 1.5rem;"><button class="st-button" id="btn-submit" onclick="hantarDataKeGoogleSheets()">🚀 Simpan Tempahan</button></div>
-            </div>
-        </section>
-
-        <!-- PLACEHOLDERS TAB LAIN -->
-        <section id="janji-temu" class="tab-content hidden"><h2>📅 Jadual & Janji Temu</h2><p>Modul siap sedia.</p></section>
-        <section id="scan-tracking" class="tab-content hidden"><h2>🔍 Scan & Tracking QR Code</h2><p>Modul siap sedia.</p></section>
-        <section id="pembayaran" class="tab-content hidden"><h2>💳 Transaksi & Pembayaran</h2><p>Modul siap sedia.</p></section>
-        <section id="invois" class="tab-content hidden"><h2>🧾 Penjanaan Invois</h2><p>Modul siap sedia.</p></section>
-        <section id="katalog-harga" class="tab-content hidden"><h2>🏷️ Katalog Harga Servis</h2><p>Modul siap sedia.</p></section>
-        <section id="cetak-barcode" class="tab-content hidden"><h2>🏷️ Cetakan Tag Barcode</h2><p>Modul siap sedia.</p></section>
-        <section id="kewangan" class="tab-content hidden"><h2>💰 Prestasi & Analitis Kewangan</h2><p>Modul siap sedia.</p></section>
-    </main>
-    <script>
-        // Menggunakan URL Google Apps Script Web App Aktif Milik Abang yang Baharu
-        const API_URL = "https://google.com";
-        let senaraiMembeli = [];
-        let dataPelangganGlobal = [];
-
-        window.onload = function() {
-            muatDataKatalogHarga();
-            muatDataPelangganSediaAda();<body>
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h1 class="sidebar-title">✨ MYCARPET PRO <span style="color: var(--primary-red);">v2.0</span></h1>
-            <p class="sidebar-subtitle">Sistem Pengurusan & Operasi</p>
-        </div>
-        <nav>
-            <ul class="menu-list">
-                <li><button class="menu-item active" onclick="switchTab('dashboard')">📊 Dashboard Utama</button></li>
-                <li><button class="menu-item" onclick="switchTab('tempahan-baru')">➕ Tempahan Baru</button></li>
-                <li><button class="menu-item" onclick="switchTab('janji-temu')">📅 Janji Temu</button></li>
-                <li><button class="menu-item" onclick="switchTab('scan-tracking')">🔍 Scan & Tracking QR</button></li>
-                <li><button class="menu-item" onclick="switchTab('pembayaran')">💳 Pembayaran</button></li>
-                <li><button class="menu-item" onclick="switchTab('invois')">🧾 Invois</button></li>
-                <li><button class="menu-item" onclick="switchTab('katalog-harga')">🏷️ Katalog Harga</button></li>
-                <li><button class="menu-item" onclick="switchTab('cetak-barcode')">🏷️ Cetak Barcode</button></li>
-                <li><button class="menu-item" onclick="switchTab('kewangan')">💰 Kewangan</button></li>
-            </ul>
-        </nav>
-        <div class="sidebar-footer"><p>MYCARPET PRO © 2026</p></div>
-    </aside>
-
-    <main class="main-container">
-        <!-- ================= TAB 1: DASHBOARD ================= -->
-        <section id="dashboard" class="tab-content">
-            <h2 class="section-title">Dashboard Utama</h2>
-            <div class="metrics-grid">
                 <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span id="val-proses" class="st-metric-value">18</span></div>
                 <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span id="val-kering" class="st-metric-value">12</span></div>
                 <div class="st-metric-card"><span class="st-metric-label">Ready to Deliver</span><span id="val-ready" class="st-metric-value">25</span></div>
@@ -413,4 +322,3 @@
     </script>
 </body>
 </html>
-
