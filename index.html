@@ -134,8 +134,8 @@
             </div>
         </section>
     </main>
-    <script>
-        // Gantikan URL di bawah dengan URL Apps Script abang yang baharu jika ada perubahan
+       <script>
+        // Menggunakan URL Google Apps Script Web App Aktif Milik Abang yang Baharu
         const API_URL = "https://google.com";
         let senaraiMembeli = [];
         let dataPelangganGlobal = [];
@@ -152,6 +152,7 @@
             event.currentTarget.classList.add('active');
         }
 
+        // FUNGSI UTAMA UNTUK AMBIL DATA DARI TAB SENARAI_HARGA SECARA REAL-TIME
         function muatDataKatalogHarga() {
             fetch(`${API_URL}?action=get_harga`)
             .then(res => res.json())
@@ -159,9 +160,10 @@
                 const select = document.getElementById('pilihan-karpet');
                 select.innerHTML = "";
                 data.forEach(item => {
+                    // Menyusun dropdown mengikut data lajur KOD, JENIS CARPET, dan HARGA OPEN dari Sheets abang
                     select.innerHTML += `<option value="${item.kod}|${item.jenis}|${item.harga}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
                 });
-            });
+            }).catch(err => console.error("Gagal memuat katalog harga:", err));
         }
 
         function muatDataPelangganSediaAda() {
@@ -170,11 +172,11 @@
             .then(data => {
                 dataPelangganGlobal = data;
                 const select = document.getElementById('select-pelanggan');
-                select.innerHTML = '<option value="">-- Pilih Pelanggan --</option>';
+                select.innerHTML = '<option value="">-- Sila Pilih Pelanggan --</option>';
                 data.forEach(p => {
                     select.innerHTML += `<option value="${p.id}">${p.id} - ${p.alamat}</option>`;
                 });
-            });
+            }).catch(err => console.error("Gagal memuat pelanggan:", err));
         }
 
         function tukarStatusPelanggan(status) {
@@ -201,15 +203,25 @@
         function tambahItemKeSenarai() {
             const raw = document.getElementById('pilihan-karpet').value.split('|');
             const qty = parseInt(document.getElementById('item-qty').value) || 1;
-            senaraiMembeli.push({ kod: raw[0], jenis: raw[1], harga: parseFloat(raw[2]), qty: qty });
+            
+            if(!raw[0]) return;
+            
+            senaraiMembeli.push({ 
+                kod: raw[0], 
+                jenis: raw[1], 
+                harga: parseFloat(raw[2]), 
+                qty: qty 
+            });
             kemaskiniJadualSkrin();
         }
 
         function kemaskiniJadualSkrin() {
             const tbody = document.querySelector('#jadual-item tbody');
-            tbody.innerHTML = ""; let total = 0;
+            tbody.innerHTML = ""; 
+            let total = 0;
             senaraiMembeli.forEach(item => {
-                let sub = item.harga * item.qty; total += sub;
+                let sub = item.harga * item.qty; 
+                total += sub;
                 tbody.innerHTML += `<tr><td>${item.kod}</td><td>${item.jenis}</td><td>RM ${item.harga.toFixed(2)}</td><td>${item.qty}</td><td>RM ${sub.toFixed(2)}</td></tr>`;
             });
             document.getElementById('total-harga-skrin').innerText = "RM " + total.toFixed(2);
@@ -217,15 +229,48 @@
 
         function hantarDataKeGoogleSheets() {
             const isBaru = document.querySelector('input[name="status-p"]:checked').value === "Baru";
+            const nama = document.getElementById('cust-nama').value;
+            const tel = document.getElementById('cust-tel').value;
+            const alamat = document.getElementById('cust-alamat').value;
+
+            if(!nama || !tel || senaraiMembeli.length === 0) {
+                alert("Sila penuhkan butiran nama, telefon dan tambah permaidani terlebih dahulu!");
+                return;
+            }
+
             const payload = {
                 action: "tambah_tempahan",
                 status_pelanggan: isBaru ? "Pelanggan Baru" : "Pelanggan Sedia Ada",
                 customer_id: document.getElementById('select-pelanggan').value,
-                nama: document.getElementById('cust-nama').value,
-                telefon: document.getElementById('cust-tel').value,
-                alamat: document.getElementById('cust-alamat').value,
+                nama: nama,
+                telefon: tel,
+                alamat: alamat,
                 total_harga: senaraiMembeli.reduce((sum, item) => sum + (item.harga * item.qty), 0),
                 items: senaraiMembeli
+            };
+
+            const btn = document.getElementById('btn-submit');
+            btn.innerText = "⏳ Sedang Menyimpan..."; 
+            btn.disabled = true;
+
+            fetch(API_URL, { 
+                method: "POST", 
+                body: JSON.stringify(payload) 
+            })
+            .then(() => {
+                alert("🎉 Tempahan MYCARPET PRO Berjaya Disimpan!");
+                location.reload();
+            }).catch(err => {
+                console.error(err);
+                alert("Ralat sambungan database!");
+                btn.innerText = "🚀 Simpan Tempahan"; 
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
+         items: senaraiMembeli
             };
 
             const btn = document.getElementById('btn-submit');
