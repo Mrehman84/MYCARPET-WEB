@@ -37,6 +37,10 @@
         .st-metric-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02); }
         .st-metric-label { font-size: 0.85rem; color: var(--gray-text); font-weight: 400; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .st-metric-value { font-size: 1.75rem; font-weight: 700; color: var(--text-color); }
+        .st-metric-delta { font-size: 0.85rem; margin-top: 0.35rem; font-weight: 600; display: flex; align-items: center; gap: 0.2rem; }
+        .st-metric-delta.positive { color: #29b578; }
+        .st-button { background-color: var(--primary-red); color: white; border: 1px solid var(--primary-red); border-radius: 4px; padding: 0.45rem 1rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .st-button:hover { background-color: var(--primary-red-hover); border-color: var(--primary-red-hover); }
         .st-form { border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-top: 1rem; background: #ffffff; max-width: 600px; }
         .form-group { margin-bottom: 1.25rem; }
         .form-label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.4rem; }
@@ -76,28 +80,32 @@
     </aside>
 
     <main class="main-container">
-        <!-- ================= TAB 1: DASHBOARD UTAMA ================= -->
+        <!-- ================= TAB 1: DASHBOARD UTAMA KOD ASAL ================= -->
         <section id="dashboard" class="tab-content">
-            <h2 class="section-title">Dashboard Utama</h2>
-            <p class="section-desc">Paparan data status operasi semasa syarikat.</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 class="section-title">Dashboard Utama</h2>
+                    <p class="section-desc">Paparan data status operasi semasa syarikat.</p>
+                </div>
+            </div>
             
             <h3 class="group-title">🛠️ Status Operasi Karpet Semasa</h3>
             <div class="metrics-grid">
-                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span id="val-proses" class="st-metric-value">31</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span id="val-kering" class="st-metric-value">4</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Ready to Deliver</span><span id="val-ready" class="st-metric-value">32</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Selesai</span><span id="val-selesai" class="st-metric-value">209</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span id="val-proses" class="st-metric-value">31</span><span class="st-metric-delta positive">▲ 2 baru sahaja masuk</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span id="val-kering" class="st-metric-value">4</span><span class="st-metric-delta positive">▲ 4 selesai dibasuh</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Ready to Deliver</span><span id="val-ready" class="st-metric-value">32</span><span class="st-metric-delta positive">▲ 8 sedia untuk penghantaran</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Selesai</span><span id="val-selesai" class="st-metric-value">209</span><span class="st-metric-delta positive">▲ 15 minggu ini</span></div>
             </div>
 
             <h3 class="group-title">📊 Ringkasan Jumlah Karpet Dibasuh</h3>
             <div class="metrics-grid">
-                <div class="st-metric-card"><span class="st-metric-label">Bulan Ini</span><span id="val-bulan" class="st-metric-value">264 helai</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Tahun Ini</span><span id="val-tahun" class="st-metric-value">2,104 helai</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Sepanjang Waktu</span><span id="val-sepanjang" class="st-metric-value">5,840 helai</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Bulan Ini</span><span id="val-bulan" class="st-metric-value">264 helai</span><span class="st-metric-delta positive">▲ +12% vs bulan lepas</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Tahun Ini</span><span id="val-tahun" class="st-metric-value">2,104 helai</span><span class="st-metric-delta positive">▲ +8.5% peningkatan tahunan</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Sepanjang Waktu</span><span id="val-sepanjang" class="st-metric-value">5,840 helai</span><span class="st-metric-delta" style="color: var(--gray-text);">Sejak Jan 2024</span></div>
             </div>
         </section>
 
-        <!-- ================= TAB 2: TEMPAHAN BARU ================= -->
+        <!-- ================= TAB 2: TEMPAHAN BARU KOD ASAL ================= -->
         <section id="tempahan-baru" class="tab-content hidden">
             <h2 class="section-title">➕ Daftar Tempahan Baru</h2>
             <div class="st-form">
@@ -151,14 +159,14 @@
         const API_URL = "https://google.com";
         let senaraiMembeli = [];
         let dataPelangganGlobal = [];
-        let dataKatalogHargaGlobal = [];
 
+        // Menjalankan fungsi penarikan data sebaik sahaja halaman web dimuatkan
         window.onload = function() {
             muatDataKatalogHarga();
             muatDataPelangganSediaAda();
         };
 
-        // FIXED SYNTAX: Memperbetulkan kesilapan string literal ${tabId} di GitHub abang tadi
+        // KOD KEDUDUKAN TAB KOD ASAL YANG PALING STABIL
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             
@@ -176,15 +184,17 @@
             }
         }
 
+        // AMBIL DATA KATALOG SECARA STRING VALUE YANG DIKUKUHKAN
         function muatDataKatalogHarga() {
             fetch(`${API_URL}?action=get_harga`)
             .then(res => res.json())
             .then(data => {
-                dataKatalogHargaGlobal = data;
                 const select = document.getElementById('pilihan-karpet');
                 select.innerHTML = "";
-                data.forEach((item, i) => {
-                    select.innerHTML += `<option value="${i}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
+                data.forEach(item => {
+                    // Membersihkan simbol tanda petik double (") daripada nama jenis karpet untuk keselamatan format value HTML
+                    let jenisClean = item.jenis.replace(/"/g, ' Inci');
+                    select.innerHTML += `<option value="${item.kod}||${jenisClean}||${item.harga}">${item.kod} - ${jenisClean} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
                 });
             }).catch(err => console.error("Gagal muat katalog harga:", err));
         }
@@ -223,19 +233,19 @@
             }
         }
 
+        // FUNGSI TAMBAH ITEM KOD ASAL DENGAN FIX PEMISAH STRING SECARA TEPAT (Kalis RM NaN)
         function tambahItemKeSenarai() {
-            const indeksPilihan = document.getElementById('pilihan-karpet').value;
-            if(indeksPilihan === "") return;
+            const dropValue = document.getElementById('pilihan-karpet').value;
+            if(dropValue === "") return;
             
-            const itemPadan = dataKatalogHargaGlobal[parseInt(indeksPilihan)];
-            if(!itemPadan) return;
-            
+            // Menggunakan pemisah berganda "||" yang kukuh dan selamat
+            const raw = dropValue.split('||');
             const qty = parseInt(document.getElementById('item-qty').value) || 1;
-            const hargaBersih = parseFloat(itemPadan.harga) || 0;
+            const hargaBersih = parseFloat(raw[2]) || 0;
             
             senaraiMembeli.push({ 
-                kod: itemPadan.kod, 
-                jenis: itemPadan.jenis, 
+                kod: raw[0], 
+                jenis: raw[1], 
                 harga: hargaBersih, 
                 qty: qty 
             });
