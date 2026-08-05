@@ -37,10 +37,6 @@
         .st-metric-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02); }
         .st-metric-label { font-size: 0.85rem; color: var(--gray-text); font-weight: 400; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .st-metric-value { font-size: 1.75rem; font-weight: 700; color: var(--text-color); }
-        .st-metric-delta { font-size: 0.85rem; margin-top: 0.35rem; font-weight: 600; display: flex; align-items: center; gap: 0.2rem; }
-        .st-metric-delta.positive { color: #29b578; }
-        .st-button { background-color: var(--primary-red); color: white; border: 1px solid var(--primary-red); border-radius: 4px; padding: 0.45rem 1rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
-        .st-button:hover { background-color: var(--primary-red-hover); border-color: var(--primary-red-hover); }
         .st-form { border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-top: 1rem; background: #ffffff; max-width: 600px; }
         .form-group { margin-bottom: 1.25rem; }
         .form-label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.4rem; }
@@ -60,7 +56,7 @@
 <body>
     <aside class="sidebar">
         <div class="sidebar-header">
-            <h1 class="sidebar-title">✨ MYCARPET PRO <span style="color: var(--primary-red);">v2.0</span></h1>
+            <h1 class="sidebar-title">✨ MYCARPET PRO <span style="color: var(--primary-red);">v3.0</span></h1>
             <p class="sidebar-subtitle">Sistem Pengurusan & Operasi</p>
         </div>
         <nav>
@@ -82,26 +78,22 @@
     <main class="main-container">
         <!-- ================= TAB 1: DASHBOARD UTAMA ================= -->
         <section id="dashboard" class="tab-content">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-                <div>
-                    <h2 class="section-title">Dashboard Utama</h2>
-                    <p class="section-desc">Paparan data status operasi semasa syarikat.</p>
-                </div>
-            </div>
+            <h2 class="section-title">Dashboard Utama</h2>
+            <p class="section-desc">Paparan data status operasi semasa syarikat.</p>
             
             <h3 class="group-title">🛠️ Status Operasi Karpet Semasa</h3>
             <div class="metrics-grid">
-                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span id="val-proses" class="st-metric-value">31</span><span class="st-metric-delta positive">▲ 2 baru sahaja masuk</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span id="val-kering" class="st-metric-value">4</span><span class="st-metric-delta positive">▲ 4 selesai dibasuh</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Ready to Deliver</span><span id="val-ready" class="st-metric-value">32</span><span class="st-metric-delta positive">▲ 8 sedia untuk penghantaran</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Selesai</span><span id="val-selesai" class="st-metric-value">209</span><span class="st-metric-delta positive">▲ 15 minggu ini</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span id="val-proses" class="st-metric-value">31</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span id="val-kering" class="st-metric-value">4</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Ready to Deliver</span><span id="val-ready" class="st-metric-value">32</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Selesai</span><span id="val-selesai" class="st-metric-value">209</span></div>
             </div>
 
             <h3 class="group-title">📊 Ringkasan Jumlah Karpet Dibasuh</h3>
             <div class="metrics-grid">
-                <div class="st-metric-card"><span class="st-metric-label">Bulan Ini</span><span id="val-bulan" class="st-metric-value">264 helai</span><span class="st-metric-delta positive">▲ +12% vs bulan lepas</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Tahun Ini</span><span id="val-tahun" class="st-metric-value">2,104 helai</span><span class="st-metric-delta positive">▲ +8.5% peningkatan tahunan</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Sepanjang Waktu</span><span id="val-sepanjang" class="st-metric-value">5,840 helai</span><span class="st-metric-delta" style="color: var(--gray-text);">Sejak Jan 2024</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Bulan Ini</span><span id="val-bulan" class="st-metric-value">264 helai</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Tahun Ini</span><span id="val-tahun" class="st-metric-value">2,104 helai</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Sepanjang Waktu</span><span id="val-sepanjang" class="st-metric-value">5,840 helai</span></div>
             </div>
         </section>
 
@@ -110,9 +102,9 @@
             <h2 class="section-title">➕ Daftar Tempahan Baru</h2>
             <div class="st-form">
                 <div class="form-group" style="margin-bottom:1.5rem;">
-                    <label class="form-label" style="margin-bottom:0.5rem;">Status Pendaftaran Pelanggan</label>
-                    <label style="margin-right:15px; font-weight:normal;"><input type="radio" name="status-p" value="Sedia Ada" checked onclick="tukarStatusPelanggan('Sedia Ada')"> Pelanggan Sedia Ada</label>
-                    <label style="font-weight:normal;"><input type="radio" name="status-p" value="Baru" onclick="tukarStatusPelanggan('Baru')"> Pelanggan Baru</label>
+                    <label class="form-label">Status Pendaftaran Pelanggan</label>
+                    <label style="margin-right:15px;"><input type="radio" name="status-p" value="Sedia Ada" checked onclick="tukarStatusPelanggan('Sedia Ada')"> Pelanggan Sedia Ada</label>
+                    <label><input type="radio" name="status-p" value="Baru" onclick="tukarStatusPelanggan('Baru')"> Pelanggan Baru</label>
                 </div>
 
                 <div class="form-group" id="box-p-sedia-ada">
@@ -161,13 +153,12 @@
         let dataPelangganGlobal = [];
         let dataKatalogHargaGlobal = [];
 
-        // Hubungkan data serta-merta sewaktu website dibuka tanpa sekatan ralat
         window.onload = function() {
             muatDataKatalogHarga();
             muatDataPelangganSediaAda();
         };
 
-        // KOD TETAPAN TAB YANG BARU DAN SELAMAT (Membuang ralat event.currentTarget)
+        // FIXED SYNTAX: Memperbetulkan kesilapan string literal ${tabId} di GitHub abang tadi
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             
@@ -177,7 +168,6 @@
             const menuButtons = document.querySelectorAll('.menu-item');
             menuButtons.forEach(btn => btn.classList.remove('active'));
             
-            // Padanan butang menggunakan gelung standard untuk keselamatan
             for (let i = 0; i < menuButtons.length; i++) {
                 if (menuButtons[i].getAttribute('onclick').includes(tabId)) {
                     menuButtons[i].classList.add('active');
