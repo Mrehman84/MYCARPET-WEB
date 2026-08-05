@@ -78,6 +78,7 @@
     </aside>
 
     <main class="main-container">
+        <!-- ================= TAB 1: DASHBOARD ================= -->
         <section id="dashboard" class="tab-content">
             <h2 class="section-title">Dashboard Utama</h2>
             <div class="metrics-grid">
@@ -86,7 +87,7 @@
             </div>
         </section>
 
-        <!-- MENU TEMPAHAN AKTIF DENGAN DATABASE REAL-TIME -->
+        <!-- ================= TAB 2: TEMPAHAN BARU ================= -->
         <section id="tempahan-baru" class="tab-content hidden">
             <h2 class="section-title">➕ Daftar Tempahan Baru</h2>
             <div class="st-form">
@@ -109,8 +110,9 @@
                 
                 <hr style="border:0; border-top:1px solid var(--border-color); margin:1.5rem 0;">
                 
+                <!-- DROPDOWN DINAMIK MENARIK REKOD TAB SENARAI_HARGA -->
                 <div class="form-group">
-                    <label class="form-label">Pilihan Jenis & Kod Karpet (Dari Tab Senarai Harga)</label>
+                    <label class="form-label">Pilihan Jenis & Kod Karpet (Tarik Real-Time Dari Sheet)</label>
                     <select id="pilihan-karpet">
                         <option value="">-- Memuatkan Senarai Katalog... --</option>
                     </select>
@@ -137,8 +139,8 @@
         <section id="kewangan" class="tab-content hidden"><h2>💰 Prestasi & Analitis Kewangan</h2><p>Modul siap sedia.</p></section>
     </main>
     <script>
-        // Membaca URL Apps Script Exec Baharu Milik Abang yang Bersambung ke Database Testing
-        const API_URL = "https://script.google.com/macros/s/AKfycbwN10vU77K54mrehccl7qIrIS37z79HcvDh0dFZ9DbIGAvuMVhYHurrF1zXQx-hA56-/exec";
+        // Menggunakan URL Google Apps Script Web App Aktif Milik Abang yang Baharu
+        const API_URL = "https://google.com";
         let senaraiMembeli = [];
         let dataPelangganGlobal = [];
 
@@ -154,6 +156,7 @@
             event.currentTarget.classList.add('active');
         }
 
+        // FUNGSI UTAMA UNTUK AMBIL DATA DARI TAB SENARAI_HARGA SECARA REAL-TIME
         function muatDataKatalogHarga() {
             fetch(`${API_URL}?action=get_harga`)
             .then(res => res.json())
@@ -161,6 +164,7 @@
                 const select = document.getElementById('pilihan-karpet');
                 select.innerHTML = "";
                 data.forEach(item => {
+                    // Menyusun dropdown mengikut data lajur KOD, JENIS CARPET, dan HARGA OPEN dari Sheets abang
                     select.innerHTML += `<option value="${item.kod}|${item.jenis}|${item.harga}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
                 });
             }).catch(err => console.error("Gagal memuat katalog harga:", err));
