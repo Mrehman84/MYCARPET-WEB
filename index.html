@@ -59,10 +59,9 @@
 </head>
 <body>
 
-    <!-- HANYA ADA SATU STRUKTUR SIDEBAR YANG BERSIH DI SINI -->
     <aside class="sidebar">
         <div class="sidebar-header">
-            <h1 class="sidebar-title">✨ MYCARPET PRO <span style="color: var(--primary-red);">v3.4</span></h1>
+            <h1 class="sidebar-title">✨ MYCARPET PRO <span style="color: var(--primary-red);">v3.3</span></h1>
             <p class="sidebar-subtitle">Sistem Pengurusan & Operasi</p>
         </div>
         <nav>
@@ -82,7 +81,7 @@
     </aside>
 
     <main class="main-container">
-        <!-- ================= TAB 1: DASHBOARD UTAMA LENGKAP ================= -->
+        <!-- ================= TAB 1: DASHBOARD UTAMA ================= -->
         <section id="dashboard" class="tab-content">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
                 <div>
@@ -181,13 +180,16 @@
             script.onload = () => script.remove();
         }
 
+        // 🛠️ FIX SANITIZATION: Menyingkirkan ralat pembacaan simbol tanda petik double (") dari sheet
         function terimaKatalogHarga(data) {
             dataKatalogHargaGlobal = data;
             const select = document.getElementById('pilihan-karpet');
             if(!select) return;
             select.innerHTML = "";
             data.forEach((item, i) => {
-                select.innerHTML += `<option value="${i}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
+                // Menukar tanda petik " menjadi teks 'Inci' supaya browser tidak menyekat muatan data dropdown
+                let jenisSelamat = item.jenis.replace(/"/g, ' Inci');
+                select.innerHTML += `<option value="${i}">${item.kod} - ${jenisSelamat} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
             });
         }
 
