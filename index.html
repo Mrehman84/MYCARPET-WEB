@@ -142,6 +142,7 @@
         const API_URL = "https://google.com";
         let senaraiMembeli = [];
         let dataPelangganGlobal = [];
+        let dataKatalogHargaGlobal = []; // Menyimpan data katalog penuh secara selamat di sini
 
         window.onload = function() {
             muatDataKatalogHarga();
@@ -153,22 +154,24 @@
             document.getElementById(tabId).classList.remove('hidden');
             document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
             
-            const targetBtn = Array.from(document.querySelectorAll('.menu-item')).find(btn => btn.getAttribute('onclick').includes(tabId));
+            const targetBtn = Array.from(document.querySelectorAll('.menu-item')).find(btn => btn.getAttribute('onclick').includes(`'${tabId}'`));
             if(targetBtn) targetBtn.classList.add('active');
         }
 
+        // 🛠️ MEMULAKAN PROSES AMBIL DATA KATALOG SECARA SELAMAT
         function muatDataKatalogHarga() {
             fetch(`${API_URL}?action=get_harga`)
             .then(res => res.json())
             .then(data => {
+                dataKatalogHargaGlobal = data; // Simpan ke dalam global array
                 const select = document.getElementById('pilihan-karpet');
                 select.innerHTML = "";
-                data.forEach(item => {
-                    // Membersihkan sebarang tanda petik dari nama gred untuk keselamatan string value
-                    let jenisClean = item.jenis.replace(/"/g, ' Kaki');
-                    select.innerHTML += `<option value="${item.kod}|${jenisClean}|${item.harga}">${item.kod} - ${jenisClean} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
+                
+                // Value hanya diletakkan sebagai INDEKS ANGKA (i) bagi mengelakkan tanda petik " merosakkan string HTML
+                data.forEach((item, i) => {
+                    select.innerHTML += `<option value="${i}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
                 });
-            });
+            }).catch(err => console.error("Gagal muat katalog harga:", err));
         }
 
         function muatDataPelangganSediaAda() {
@@ -181,7 +184,7 @@
                 data.forEach(p => {
                     select.innerHTML += `<option value="${p.id}">${p.id} - ${p.alamat}</option>`;
                 });
-            });
+            }).catch(err => console.error("Gagal muat pelanggan:", err));
         }
 
         function tukarStatusPelanggan(status) {
@@ -205,20 +208,21 @@
             }
         }
 
-        // 🛠️ KOD PENYELAMAT: Kalis ralat tanda petik (Menghilangkan RM NaN)
+        // 🛠️ KOD BARU PENYELAMAT: Padaman kaedah string split, bertukar kepada carian Indeks Array (100% Selesai Isu NaN)
         function tambahItemKeSenarai() {
-            const dropValue = document.getElementById('pilihan-karpet').value;
-            if(!dropValue) return;
+            const indeksPilihan = document.getElementById('pilihan-karpet').value;
+            if(indeksPilihan === "") return;
             
-            const raw = dropValue.split('|');
+            // Ambil data tulen objek dari global array berdasarkan indeks nombor dropdown
+            const itemPadan = dataKatalogHargaGlobal[parseInt(indeksPilihan)];
+            if(!itemPadan) return;
+            
             const qty = parseInt(document.getElementById('item-qty').value) || 1;
-            
-            // Memastikan data harga diproses sebagai angka float yang bersih
-            const hargaBersih = parseFloat(raw[2]) || 0;
+            const hargaBersih = parseFloat(itemPadan.harga) || 0;
             
             senaraiMembeli.push({ 
-                kod: raw[0], 
-                jenis: raw[1], 
+                kod: itemPadan.kod, 
+                jenis: itemPadan.jenis, 
                 harga: hargaBersih, 
                 qty: qty 
             });
@@ -229,10 +233,17 @@
             const tbody = document.querySelector('#jadual-item tbody');
             tbody.innerHTML = ""; 
             let total = 0;
+            
             senaraiMembeli.forEach(item => {
                 let sub = item.harga * item.qty; 
                 total += sub;
-                tbody.innerHTML += `<tr><td>${item.kod}</td><td>${item.jenis}</td><td>RM ${item.harga.toFixed(2)}</td><td>${item.qty}</td><td>RM ${sub.toFixed(2)}</td></tr>`;
+                tbody.innerHTML += `<tr>
+                    <td>${item.kod}</td>
+                    <td>${item.jenis}</td>
+                    <td>RM ${item.harga.toFixed(2)}</td>
+                    <td>${item.qty}</td>
+                    <td>RM ${sub.toFixed(2)}</td>
+                </tr>`;
             });
             document.getElementById('total-harga-skrin').innerText = "RM " + total.toFixed(2);
         }
@@ -305,6 +316,5 @@
             }, 500);
         }
     </script>
-</body>
-</html>
+
 
