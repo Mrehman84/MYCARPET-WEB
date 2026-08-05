@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MYCARPET PRO v3.0</title>
+    <title>MYCARPET PRO v3.4</title>
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
         :root {
@@ -59,6 +59,7 @@
 </head>
 <body>
 
+    <!-- HANYA ADA SATU STRUKTUR SIDEBAR YANG BERSIH DI SINI -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <h1 class="sidebar-title">✨ MYCARPET PRO <span style="color: var(--primary-red);">v3.4</span></h1>
@@ -81,7 +82,7 @@
     </aside>
 
     <main class="main-container">
-        <!-- ================= TAB 1: DASHBOARD UTAMA LENGKAP ASAL ================= -->
+        <!-- ================= TAB 1: DASHBOARD UTAMA LENGKAP ================= -->
         <section id="dashboard" class="tab-content">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
                 <div>
@@ -105,59 +106,7 @@
                 <div class="st-metric-card"><span class="st-metric-label">Sepanjang Waktu</span><span id="val-sepanjang" class="st-metric-value">5,840 helai</span><span class="st-metric-delta" style="color: var(--gray-text);">Sejak Jan 2024</span></div>
             </div>
 
-            <h3 class="group-title">💰 Prestasi Kewangan & Jualan</h3>
-            <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                <div class="st-metric-card" style="border-left: 4px solid var(--primary-red);"><span class="st-metric-label">Jumlah Jualan Bulan Ini</span><span id="val-jualan" class="st-metric-value" style="color: var(--primary-red);">RM 14,850.00</span><span class="st-metric-delta positive">▲ KPI Terlampau</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Purata Nilai Setiap Tempahan</span><span id="val-purata" class="st-metric-value">RM 75.38</span><span class="st-metric-delta positive">▲ +3.4% naik</span></div>
-            </div>
-<body>
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h1 class="sidebar-title">✨ MYCARPET PRO <span style="color: var(--primary-red);">v3.0</span></h1>
-            <p class="sidebar-subtitle">Sistem Pengurusan & Operasi</p>
-        </div>
-        <nav>
-            <ul class="menu-list">
-                <li><button class="menu-item active" onclick="switchTab('dashboard')">📊 Dashboard Utama</button></li>
-                <li><button class="menu-item" onclick="switchTab('tempahan-baru')">➕ Tempahan Baru</button></li>
-                <li><button class="menu-item" onclick="switchTab('janji-temu')">📅 Janji Temu</button></li>
-                <li><button class="menu-item" onclick="switchTab('scan-tracking')">🔍 Scan & Tracking QR</button></li>
-                <li><button class="menu-item" onclick="switchTab('pembayaran')">💳 Pembayaran</button></li>
-                <li><button class="menu-item" onclick="switchTab('invois')">🧾 Invois</button></li>
-                <li><button class="menu-item" onclick="switchTab('katalog-harga')">🏷️ Katalog Harga</button></li>
-                <li><button class="menu-item" onclick="switchTab('cetak-barcode')">🏷️ Cetak Barcode</button></li>
-                <li><button class="menu-item" onclick="switchTab('kewangan')">💰 Kewangan</button></li>
-            </ul>
-        </nav>
-        <div class="sidebar-footer"><p>MYCARPET PRO © 2026</p></div>
-    </aside>
-
-    <main class="main-container">
-        <!-- ================= TAB 1: DASHBOARD UTAMA LENGKAP ASAL ================= -->
-        <section id="dashboard" class="tab-content">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-                <div>
-                    <h2 class="section-title">Dashboard Utama</h2>
-                    <p class="section-desc">Paparan data status operasi semasa syarikat.</p>
-                </div>
-            </div>
-            
-            <h3 class="group-title">🛠️ Status Operasi Karpet Semasa</h3>
-            <div class="metrics-grid">
-                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span id="val-proses" class="st-metric-value">31</span><span class="st-metric-delta positive">▲ 2 baru sahaja masuk</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span id="val-kering" class="st-metric-value">4</span><span class="st-metric-delta positive">▲ 4 selesai dibasuh</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Ready to Deliver</span><span id="val-ready" class="st-metric-value">32</span><span class="st-metric-delta positive">▲ 8 sedia untuk penghantaran</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Selesai</span><span id="val-selesai" class="st-metric-value">209</span><span class="st-metric-delta positive">▲ 15 minggu ini</span></div>
-            </div>
-
-            <h3 class="group-title">📊 Ringkasan Jumlah Karpet Dibasuh</h3>
-            <div class="metrics-grid">
-                <div class="st-metric-card"><span class="st-metric-label">Bulan Ini</span><span id="val-bulan" class="st-metric-value">264 helai</span><span class="st-metric-delta positive">▲ +12% vs bulan lepas</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Tahun Ini</span><span id="val-tahun" class="st-metric-value">2,104 helai</span><span class="st-metric-delta positive">▲ +8.5% peningkatan tahunan</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Sepanjang Waktu</span><span id="val-sepanjang" class="st-metric-value">5,840 helai</span><span class="st-metric-delta" style="color: var(--gray-text);">Sejak Jan 2024</span></div>
-            </div>
-
-            <h3 class="group-title">💰 Prestasi Kewangan & Jualan</h3>
+            <h3 class="group-title">👤 Prestasi Kewangan & Jualan</h3>
             <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
                 <div class="st-metric-card" style="border-left: 4px solid var(--primary-red);"><span class="st-metric-label">Jumlah Jualan Bulan Ini</span><span id="val-jualan" class="st-metric-value" style="color: var(--primary-red);">RM 14,850.00</span><span class="st-metric-delta positive">▲ KPI Terlampau</span></div>
                 <div class="st-metric-card"><span class="st-metric-label">Purata Nilai Setiap Tempahan</span><span id="val-purata" class="st-metric-value">RM 75.38</span><span class="st-metric-delta positive">▲ +3.4% naik</span></div>
@@ -220,7 +169,6 @@
         let dataPelangganGlobal = [];
         let dataKatalogHargaGlobal = [];
 
-        // Menjalankan tarikan data melalui teknik JSONP sebaik sahaja web dimuatkan
         window.onload = function() {
             panggilDataJSONP("get_harga", "terimaKatalogHarga");
             panggilDataJSONP("get_pelanggan", "terimaDataPelanggan");
@@ -239,7 +187,6 @@
             if(!select) return;
             select.innerHTML = "";
             data.forEach((item, i) => {
-                // Selamat daripada ralat tanda petik (") dengan memetakan indeks memori 'i'
                 select.innerHTML += `<option value="${i}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
             });
         }
