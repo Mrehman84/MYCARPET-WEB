@@ -162,61 +162,55 @@
         <section id="kewangan" class="tab-content hidden"><h2>💰 Prestasi & Analitis Kewangan</h2><p>Modul siap sedia.</p></section>
     </main>
     <script>
-        const API_URL = "https://google.com";
+        // 🛠️ PAUTAN API TERKINI YANG TELAH DISATUKAN DENGAN BETUL
+        const API_URL = "https://script.google.com/macros/s/AKfycbwN10vU77K54mrehccl7qIrIS37z79HcvDh0dFZ9DbIGAvuMVhYHurrF1zXQx-hA56-/exec";
         let senaraiMembeli = [];
         let dataPelangganGlobal = [];
-        let dataKatalogHargaGlobal = []; // Menyimpan objek asal dari Sheets secara selamat
+        let dataKatalogHargaGlobal = [];
 
-        // Menjalankan sambungan API secara mandatori sewaktu skrin dibuka
         window.onload = function() {
-            muatDataKatalogHarga();
-            muatDataPelangganSediaAda();
+            panggilDataJSONP("get_harga", "terimaKatalogHarga");
+            panggilDataJSONP("get_pelanggan", "terimaDataPelanggan");
         };
+
+        function panggilDataJSONP(action, callbackName) {
+            const script = document.createElement("script");
+            script.src = `${API_URL}?action=${action}&callback=${callbackName}`;
+            document.body.appendChild(script);
+            script.onload = () => script.remove();
+        }
+
+        function terimaKatalogHarga(data) {
+            dataKatalogHargaGlobal = data;
+            const select = document.getElementById('pilihan-karpet');
+            select.innerHTML = "";
+            data.forEach((item, i) => {
+                select.innerHTML += `<option value="${i}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
+            });
+        }
+
+        function terimaDataPelanggan(data) {
+            dataPelangganGlobal = data;
+            const select = document.getElementById('select-pelanggan');
+            select.innerHTML = '<option value="">-- Sila Pilih Pelanggan --</option>';
+            data.forEach(p => {
+                select.innerHTML += `<option value="${p.id}">${p.id} - ${p.alamat}</option>`;
+            });
+        }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            
             const activeTab = document.getElementById(tabId);
             if (activeTab) activeTab.classList.remove('hidden');
             
             const menuButtons = document.querySelectorAll('.menu-item');
             menuButtons.forEach(btn => btn.classList.remove('active'));
-            
             for (let i = 0; i < menuButtons.length; i++) {
                 if (menuButtons[i].getAttribute('onclick').includes(tabId)) {
                     menuButtons[i].classList.add('active');
                     break;
                 }
             }
-        }
-
-        // AMBIL DATA BERDASARKAN INDEKS MEMORI (100% Mengelakkan String Pecah & RM NaN)
-        function muatDataKatalogHarga() {
-            fetch(`${API_URL}?action=get_harga`)
-            .then(res => res.json())
-            .then(data => {
-                dataKatalogHargaGlobal = data;
-                const select = document.getElementById('pilihan-karpet');
-                select.innerHTML = "";
-                
-                // Menyimpan nombor indeks 'i' pada value untuk mengelakkan ralat tanda petik double (") dari sheet
-                data.forEach((item, i) => {
-                    select.innerHTML += `<option value="${i}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
-                });
-            }).catch(err => console.error("Gagal muat katalog harga:", err));
-        }
-
-        function muatDataPelangganSediaAda() {
-            fetch(`${API_URL}?action=get_pelanggan`)
-            .then(res => res.json())
-            .then(data => {
-                dataPelangganGlobal = data;
-                const select = document.getElementById('select-pelanggan');
-                select.innerHTML = '<option value="">-- Sila Pilih Pelanggan --</option>';
-                data.forEach(p => {
-                    select.innerHTML += `<option value="${p.id}">${p.id} - ${p.alamat}</option>`;
-                });
-            }).catch(err => console.error("Gagal muat pelanggan:", err));
         }
 
         function tukarStatusPelanggan(status) {
@@ -240,12 +234,10 @@
             }
         }
 
-        // FUNGSI UTAMA TAMBAH ITEM KALIS RM NaN
         function tambahItemKeSenarai() {
             const indeksPilihan = document.getElementById('pilihan-karpet').value;
             if(indeksPilihan === "") return;
             
-            // Mengambil baris asal dari memori global berasaskan indeks angka dropdown
             const itemPadan = dataKatalogHargaGlobal[parseInt(indeksPilihan)];
             if(!itemPadan) return;
             
@@ -265,7 +257,6 @@
             const tbody = document.querySelector('#jadual-item tbody');
             tbody.innerHTML = ""; 
             let total = 0;
-            
             senaraiMembeli.forEach(item => {
                 let sub = item.harga * item.qty; 
                 total += sub;
@@ -287,7 +278,7 @@
             const alamat = document.getElementById('cust-alamat').value;
 
             if(!nama || !tel || senaraiMembeli.length === 0) {
-                alert("Sila penuhkan butiran nama, telefon dan PASTIKAN anda tekan butang 'Tambah Item' permaidani dahulu!");
+                alert("Sila penuhkan butiran nama, telefon dan tambah item permaidani dahulu!");
                 return;
             }
 
@@ -316,5 +307,3 @@
             });
         }
     </script>
-</body>
-</html>
