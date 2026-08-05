@@ -80,7 +80,7 @@
     </aside>
 
     <main class="main-container">
-        <!-- ================= TAB 1: DASHBOARD UTAMA (DIKEMBALIKAN) ================= -->
+        <!-- ================= TAB 1: DASHBOARD UTAMA ================= -->
         <section id="dashboard" class="tab-content">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
                 <div>
@@ -173,13 +173,23 @@
             muatDataPelangganSediaAda();
         };
 
+        // BAIKI BUG TAB: Menghilangkan pepijat tersangkut semasa klik menu sidebar
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
+            
+            const activeTab = document.getElementById(tabId);
+            if (activeTab) activeTab.classList.remove('hidden');
+            
             document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
             
-            const targetBtn = Array.from(document.querySelectorAll('.menu-item')).find(btn => btn.getAttribute('onclick').includes(`'${tabId}'`));
-            if(targetBtn) targetBtn.classList.add('active');
+            // Mencari elemen butang dengan lebih selamat menggunakan gelung standard
+            const menuButtons = document.querySelectorAll('.menu-item');
+            for (let i = 0; i < menuButtons.length; i++) {
+                if (menuButtons[i].getAttribute('onclick').includes(tabId)) {
+                    menuButtons[i].classList.add('active');
+                    break;
+                }
+            }
         }
 
         function muatDataKatalogHarga() {
@@ -190,7 +200,7 @@
                 const select = document.getElementById('pilihan-karpet');
                 select.innerHTML = "";
                 
-                // MENGGUNAKAN VALUE INDEKS ANGKA (Kalis tanda petik ")
+                // MENGGUNAKAN INDEKS ANGKA (i) SAHAJA: 100% Selesai Isu RM NaN & Tanda Petik
                 data.forEach((item, i) => {
                     select.innerHTML += `<option value="${i}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
                 });
@@ -231,7 +241,6 @@
             }
         }
 
-        // AMBIL DATA BERDASARKAN SEBUTAN INDEKS MEMORI (100% Kalis RM NaN)
         function tambahItemKeSenarai() {
             const indeksPilihan = document.getElementById('pilihan-karpet').value;
             if(indeksPilihan === "") return;
@@ -311,7 +320,6 @@
             const container = document.getElementById('container-status-badge');
             
             if(!searchId) return;
-            
             container.innerHTML = "⏳ Mencari...";
             
             setTimeout(() => {
@@ -320,7 +328,6 @@
                 if(searchId.includes("-3")) mockStatus = "READY TO DELIVER";
                 
                 container.innerHTML = "";
-                
                 if (mockStatus === "DALAM PROSES") {
                     container.innerHTML = `<div style="background-color: #1e293b; color: #38bdf8; padding: 12px 16px; border-radius: 6px; border-left: 5px solid #0ea5e9; font-size:14px;">🆔 <b>${searchId}</b> | 🔄 Status Semasa: <b style="color: #0ea5e9;">${mockStatus}</b></div>`;
                 } else if (mockStatus === "PENGERINGAN" || mockStatus === "READY TO DELIVER") {
@@ -330,7 +337,7 @@
         }
 
         function simulateDataUpdate() {
-            alert("Fungsi penyelarasan metrik sedia dikonfigurasikan.");
+            alert("Data metrik sedia disinkronisasikan.");
         }
     </script>
 </body>
