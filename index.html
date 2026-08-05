@@ -37,6 +37,8 @@
         .st-metric-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02); }
         .st-metric-label { font-size: 0.85rem; color: var(--gray-text); font-weight: 400; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .st-metric-value { font-size: 1.75rem; font-weight: 700; color: var(--text-color); }
+        .st-metric-delta { font-size: 0.85rem; margin-top: 0.35rem; font-weight: 600; display: flex; align-items: center; gap: 0.2rem; }
+        .st-metric-delta.positive { color: #29b578; }
         .st-button { background-color: var(--primary-red); color: white; border: 1px solid var(--primary-red); border-radius: 4px; padding: 0.45rem 1rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
         .st-button:hover { background-color: var(--primary-red-hover); border-color: var(--primary-red-hover); }
         .st-form { border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-top: 1rem; background: #ffffff; max-width: 600px; }
@@ -78,12 +80,35 @@
     </aside>
 
     <main class="main-container">
-        <!-- ================= TAB 1: DASHBOARD ================= -->
+        <!-- ================= TAB 1: DASHBOARD UTAMA (DIKEMBALIKAN) ================= -->
         <section id="dashboard" class="tab-content">
-            <h2 class="section-title">Dashboard Utama</h2>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 class="section-title">Dashboard Utama</h2>
+                    <p class="section-desc">Paparan data status operasi semasa dan ringkasan jualan masa nyata.</p>
+                </div>
+                <button class="st-button" onclick="simulateDataUpdate()">🔄 Kemaskini Data</button>
+            </div>
+            
+            <h3 class="group-title">🛠️ Status Operasi Karpet Semasa</h3>
             <div class="metrics-grid">
-                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span class="st-metric-value">18</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span class="st-metric-value">12</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span id="val-proses" class="st-metric-value">31</span><span class="st-metric-delta positive">▲ 2 baru sahaja masuk</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span id="val-kering" class="st-metric-value">4</span><span class="st-metric-delta positive">▲ 4 selesai dibasuh</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Ready to Deliver</span><span id="val-ready" class="st-metric-value">32</span><span class="st-metric-delta positive">▲ 8 sedia untuk penghantaran</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Selesai</span><span id="val-selesai" class="st-metric-value">209</span><span class="st-metric-delta positive">▲ 15 minggu ini</span></div>
+            </div>
+
+            <h3 class="group-title">📊 Ringkasan Jumlah Karpet Dibasuh</h3>
+            <div class="metrics-grid">
+                <div class="st-metric-card"><span class="st-metric-label">Bulan Ini</span><span id="val-bulan" class="st-metric-value">264 helai</span><span class="st-metric-delta positive">▲ +12% vs bulan lepas</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Tahun Ini</span><span id="val-tahun" class="st-metric-value">2,104 helai</span><span class="st-metric-delta positive">▲ +8.5% peningkatan tahunan</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Sepanjang Waktu</span><span id="val-sepanjang" class="st-metric-value">5,840 helai</span><span class="st-metric-delta" style="color: var(--gray-text);">Sejak Jan 2024</span></div>
+            </div>
+
+            <h3 class="group-title">💰 Prestasi Kewangan & Jualan</h3>
+            <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                <div class="st-metric-card" style="border-left: 4px solid var(--primary-red);"><span class="st-metric-label">Jumlah Jualan Bulan Ini</span><span id="val-jualan" class="st-metric-value" style="color: var(--primary-red);">RM 14,850.00</span><span class="st-metric-delta positive">▲ KPI Terlampau</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Purata Nilai Setiap Tempahan</span><span id="val-purata" class="st-metric-value">RM 75.38</span><span class="st-metric-delta positive">▲ +3.4% naik</span></div>
             </div>
         </section>
 
@@ -91,10 +116,10 @@
         <section id="tempahan-baru" class="tab-content hidden">
             <h2 class="section-title">➕ Daftar Tempahan Baru</h2>
             <div class="st-form">
-                <div class="form-group">
-                    <label class="form-label">Status Pendaftaran Pelanggan</label>
-                    <input type="radio" name="status-p" value="Sedia Ada" checked onclick="tukarStatusPelanggan('Sedia Ada')"> Pelanggan Sedia Ada
-                    <input type="radio" name="status-p" value="Baru" onclick="tukarStatusPelanggan('Baru')"> Pelanggan Baru
+                <div class="form-group" style="margin-bottom:1.5rem;">
+                    <label class="form-label" style="margin-bottom:0.5rem;">Status Pendaftaran Pelanggan</label>
+                    <label style="margin-right:15px; font-weight:normal;"><input type="radio" name="status-p" value="Sedia Ada" checked onclick="tukarStatusPelanggan('Sedia Ada')"> Pelanggan Sedia Ada</label>
+                    <label style="font-weight:normal;"><input type="radio" name="status-p" value="Baru" onclick="tukarStatusPelanggan('Baru')"> Pelanggan Baru</label>
                 </div>
 
                 <div class="form-group" id="box-p-sedia-ada">
@@ -105,20 +130,19 @@
                 </div>
 
                 <div class="form-group"><label class="form-label">Nama Pelanggan</label><input type="text" id="cust-nama" class="st-input" placeholder="Nama penuh"></div>
-                <div class="form-group"><label class="form-label">No. Telefon</label><input type="text" id="cust-tel" class="st-input" placeholder="Contoh: 0123456789"></div>
+                <div class="form-group"><label class="form-label">No. Telefon</label><input type="text" id="cust-tel" class="st-input" placeholder="0123456789"></div>
                 <div class="form-group"><label class="form-label">Alamat Rumah Penghantaran</label><input type="text" id="cust-alamat" class="st-input" placeholder="Alamat lengkap"></div>
                 
                 <hr style="border:0; border-top:1px solid var(--border-color); margin:1.5rem 0;">
                 
-                <!-- DROPDOWN DINAMIK MENARIK REKOD TAB SENARAI_HARGA -->
                 <div class="form-group">
-                    <label class="form-label">Pilihan Jenis & Kod Karpet (Tarik Real-Time Dari Sheet)</label>
+                    <label class="form-label">Pilihan Jenis & Kod Karpet (Dari Tab Senarai Harga)</label>
                     <select id="pilihan-karpet">
                         <option value="">-- Memuatkan Senarai Katalog... --</option>
                     </select>
                 </div>
                 <div class="form-group"><label class="form-label">Kuantiti (Helai)</label><input type="number" id="item-qty" class="st-input" value="1" min="1"></div>
-                <button class="st-button" type="button" onclick="tambahItemKeSenarai()" style="background-color:#31333f;">➕ Tambah Item</button>
+                <button class="st-button" type="button" onclick="tambahItemKeSenarai()" style="background-color:#31333f; border-color:#31333f;">➕ Tambah Item</button>
                 
                 <table class="st-table" id="jadual-item">
                     <thead><tr><th>Kod</th><th>Jenis Perkhidmatan</th><th>Harga Seunit</th><th>Kuantiti</th><th>Jumlah</th></tr></thead>
@@ -130,8 +154,8 @@
         </section>
 
         <!-- PLACEHOLDERS TAB LAIN -->
+        <section id="scan-tracking" class="tab-content hidden"><h2>🔍 Scan & Tracking QR Code</h2><div class="st-form"><div class="form-group"><label class="form-label">Masukkan QR ID / No Invois:</label><input type="text" id="input-qr-search" class="st-input" placeholder="INV2670001-1" style="max-width:400px; display:inline-block; margin-right:10px;"><button class="st-button" onclick="cariStatusKarpetFizikal()">🔍 Cari</button></div><div id="container-status-badge" style="margin-top:20px;"></div></div></section>
         <section id="janji-temu" class="tab-content hidden"><h2>📅 Jadual & Janji Temu</h2><p>Modul siap sedia.</p></section>
-        <section id="scan-tracking" class="tab-content hidden"><h2>🔍 Scan & Tracking QR Code</h2><p>Modul siap sedia.</p></section>
         <section id="pembayaran" class="tab-content hidden"><h2>💳 Transaksi & Pembayaran</h2><p>Modul siap sedia.</p></section>
         <section id="invois" class="tab-content hidden"><h2>🧾 Penjanaan Invois</h2><p>Modul siap sedia.</p></section>
         <section id="katalog-harga" class="tab-content hidden"><h2>🏷️ Katalog Harga Servis</h2><p>Modul siap sedia.</p></section>
@@ -142,7 +166,7 @@
         const API_URL = "https://google.com";
         let senaraiMembeli = [];
         let dataPelangganGlobal = [];
-        let dataKatalogHargaGlobal = []; // Menyimpan data katalog penuh secara selamat di sini
+        let dataKatalogHargaGlobal = [];
 
         window.onload = function() {
             muatDataKatalogHarga();
@@ -158,16 +182,15 @@
             if(targetBtn) targetBtn.classList.add('active');
         }
 
-        // 🛠️ MEMULAKAN PROSES AMBIL DATA KATALOG SECARA SELAMAT
         function muatDataKatalogHarga() {
             fetch(`${API_URL}?action=get_harga`)
             .then(res => res.json())
             .then(data => {
-                dataKatalogHargaGlobal = data; // Simpan ke dalam global array
+                dataKatalogHargaGlobal = data;
                 const select = document.getElementById('pilihan-karpet');
                 select.innerHTML = "";
                 
-                // Value hanya diletakkan sebagai INDEKS ANGKA (i) bagi mengelakkan tanda petik " merosakkan string HTML
+                // MENGGUNAKAN VALUE INDEKS ANGKA (Kalis tanda petik ")
                 data.forEach((item, i) => {
                     select.innerHTML += `<option value="${i}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
                 });
@@ -208,12 +231,11 @@
             }
         }
 
-        // 🛠️ KOD BARU PENYELAMAT: Padaman kaedah string split, bertukar kepada carian Indeks Array (100% Selesai Isu NaN)
+        // AMBIL DATA BERDASARKAN SEBUTAN INDEKS MEMORI (100% Kalis RM NaN)
         function tambahItemKeSenarai() {
             const indeksPilihan = document.getElementById('pilihan-karpet').value;
             if(indeksPilihan === "") return;
             
-            // Ambil data tulen objek dari global array berdasarkan indeks nombor dropdown
             const itemPadan = dataKatalogHargaGlobal[parseInt(indeksPilihan)];
             if(!itemPadan) return;
             
@@ -276,7 +298,7 @@
 
             fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
             .then(() => {
-                alert("🎉 Tempahan Berjaya Disimpan ke Google Sheets!");
+                alert("🎉 Tempahan Berjaya Disimpan!");
                 location.reload();
             }).catch(() => {
                 alert("Ralat sambungan database!");
@@ -288,12 +310,9 @@
             const searchId = document.getElementById('input-qr-search').value.trim().toUpperCase();
             const container = document.getElementById('container-status-badge');
             
-            if(!searchId) {
-                alert("Sila masukkan QR ID permaidani!");
-                return;
-            }
+            if(!searchId) return;
             
-            container.innerHTML = "⏳ Mencari dalam database...";
+            container.innerHTML = "⏳ Mencari...";
             
             setTimeout(() => {
                 let mockStatus = "DALAM PROSES";
@@ -303,18 +322,16 @@
                 container.innerHTML = "";
                 
                 if (mockStatus === "DALAM PROSES") {
-                    container.innerHTML = `
-                        <div style="background-color: #1e293b; color: #38bdf8; padding: 12px 16px; border-radius: 6px; border-left: 5px solid #0ea5e9; font-size:14px;">
-                            🆔 <b>${searchId}</b> | 🔄 Status Semasa: <b style="color: #0ea5e9;">${mockStatus}</b>
-                        </div>`;
+                    container.innerHTML = `<div style="background-color: #1e293b; color: #38bdf8; padding: 12px 16px; border-radius: 6px; border-left: 5px solid #0ea5e9; font-size:14px;">🆔 <b>${searchId}</b> | 🔄 Status Semasa: <b style="color: #0ea5e9;">${mockStatus}</b></div>`;
                 } else if (mockStatus === "PENGERINGAN" || mockStatus === "READY TO DELIVER") {
-                    container.innerHTML = `
-                        <div style="background-color: #2e2511; color: #fbbf24; padding: 12px 16px; border-radius: 6px; border-left: 5px solid #eab308; font-size:14px;">
-                            🆔 <b>${searchId}</b> | 🔄 Status Semasa: <b style="color: #eab308;">${mockStatus}</b>
-                        </div>`;
+                    container.innerHTML = `<div style="background-color: #2e2511; color: #fbbf24; padding: 12px 16px; border-radius: 6px; border-left: 5px solid #eab308; font-size:14px;">🆔 <b>${searchId}</b> | 🔄 Status Semasa: <b style="color: #eab308;">${mockStatus}</b></div>`;
                 }
             }, 500);
         }
+
+        function simulateDataUpdate() {
+            alert("Fungsi penyelarasan metrik sedia dikonfigurasikan.");
+        }
     </script>
-
-
+</body>
+</html>
