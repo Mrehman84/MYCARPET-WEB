@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MYCARPET PRO v2.0</title>
-    <!-- Google Font - Menyerupai tipografi Streamlit -->
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://googleapis.com" rel="stylesheet">
     <style>
-        /* Tetapan Asas Gaya Streamlit */
         :root {
             --primary-red: #ff4b4b;
             --primary-red-hover: #e04343;
@@ -18,355 +15,63 @@
             --border-color: #e6e9ef;
             --gray-text: #5c6479;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-color);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Garis Merah Khas Streamlit di bahagian atas skrin */
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background-color: var(--primary-red);
-            z-index: 1000;
-        }
-
-        /* SUSUN ATUR SIDEBAR */
-        .sidebar {
-            width: 290px;
-            background-color: var(--bg-sidebar);
-            height: 100%;
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            padding: 2rem 1rem 1rem 1rem;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }
-
-        .sidebar-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .sidebar-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .sidebar-subtitle {
-            font-size: 0.85rem;
-            color: var(--gray-text);
-            margin-top: 0.25rem;
-        }
-
-        /* MENU SIDEBAR */
-        .menu-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-        }
-
-        .menu-item {
-            width: 100%;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            text-align: left;
-            padding: 0.65rem 0.85rem;
-            font-size: 0.95rem;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .menu-item:hover {
-            background-color: rgba(0, 0, 0, 0.04);
-        }
-
-        /* Elemen Aktif Meniru Streamlit Navigation */
-        .menu-item.active {
-            background-color: #ffffff;
-            color: var(--primary-red);
-            font-weight: 600;
-            border-left: 4px solid var(--primary-red);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        /* KANDUNGAN UTAMA */
-        .main-container {
-            flex: 1;
-            padding: 3rem 2.5rem;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .tab-content {
-            display: block;
-            animation: fadeIn 0.2s ease-in-out;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* GAYA METRIK & KAD (st.metric style) */
-        h2.section-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--text-color);
-        }
-
-        .section-desc {
-            font-size: 0.95rem;
-            color: var(--gray-text);
-            margin-bottom: 2rem;
-        }
-
-        h3.group-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin: 1.8rem 0 0.8rem 0;
-            color: var(--text-color);
-            border-left: 3px solid #d3d6df;
-            padding-left: 0.5rem;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .st-metric-card {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        }
-
-        .st-metric-label {
-            font-size: 0.85rem;
-            color: var(--gray-text);
-            font-weight: 400;
-            margin-bottom: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .st-metric-value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-color);
-        }
-
-        .st-metric-delta {
-            font-size: 0.85rem;
-            margin-top: 0.35rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.2rem;
-        }
-
-        .st-metric-delta.positive {
-            color: #29b578;
-        }
-
-        .st-metric-delta.negative {
-            color: var(--primary-red);
-        }
-
-        /* BUTANG INTERAKTIF STREAMLIT */
-        .st-button {
-            background-color: var(--primary-red);
-            color: white;
-            border: 1px solid var(--primary-red);
-            border-radius: 4px;
-            padding: 0.45rem 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .st-button:hover {
-            background-color: var(--primary-red-hover);
-            border-color: var(--primary-red-hover);
-        }
-
-        .st-button-secondary {
-            background-color: transparent;
-            color: var(--text-color);
-            border: 1px solid #d3d6df;
-            border-radius: 4px;
-            padding: 0.45rem 1rem;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .st-button-secondary:hover {
-            border-color: var(--primary-red);
-            color: var(--primary-red);
-        }
-
-        /* REKA BENTUK KOMPONEN / PLACEHOLDER */
-        .placeholder-card {
-            border: 1px dashed #c3c7db;
-            background-color: #fcfdfe;
-            border-radius: 8px;
-            padding: 3rem 2rem;
-            text-align: center;
-            margin-top: 1rem;
-        }
-
-        .placeholder-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #a0a6be;
-        }
-
-        /* REKA BENTUK FORM STREAMLIT (Mockup) */
-        .st-form {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-            background: #ffffff;
-            max-width: 600px;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 0.4rem;
-        }
-
-        .st-input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #d3d6df;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .st-input:focus {
-            border-color: var(--primary-red);
-            box-shadow: 0 0 0 1px var(--primary-red);
-        }
-
-        /* NOTIFIKASI TOAST (Sama seperti st.toast) */
-        .st-toast {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background-color: #31333f;
-            color: #ffffff;
-            padding: 0.75rem 1.25rem;
-            border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            font-size: 0.9rem;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-            z-index: 1001;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .st-toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* FOOTER SIDEBAR */
-        .sidebar-footer {
-            margin-top: auto;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
-            font-size: 0.75rem;
-            color: var(--gray-text);
-            text-align: center;
-        }
-
-        /* RESPONSIVE DESIGN */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Source Sans Pro', sans-serif; background-color: var(--bg-main); color: var(--text-color); display: flex; height: 100vh; overflow: hidden; }
+        body::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background-color: var(--primary-red); z-index: 1000; }
+        .sidebar { width: 290px; background-color: var(--bg-sidebar); height: 100%; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; padding: 2rem 1rem 1rem 1rem; overflow-y: auto; flex-shrink: 0; }
+        .sidebar-header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+        .sidebar-title { font-size: 1.35rem; font-weight: 700; color: var(--text-color); display: flex; align-items: center; gap: 0.5rem; }
+        .sidebar-subtitle { font-size: 0.85rem; color: var(--gray-text); margin-top: 0.25rem; }
+        .menu-list { list-style: none; display: flex; flex-direction: column; gap: 0.35rem; }
+        .menu-item { width: 100%; background: none; border: none; color: var(--text-color); text-align: left; padding: 0.65rem 0.85rem; font-size: 0.95rem; cursor: pointer; border-radius: 6px; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.75rem; }
+        .menu-item:hover { background-color: rgba(0, 0, 0, 0.04); }
+        .menu-item.active { background-color: #ffffff; color: var(--primary-red); font-weight: 600; border-left: 4px solid var(--primary-red); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+        .main-container { flex: 1; padding: 3rem 2.5rem; overflow-y: auto; position: relative; }
+        .tab-content { display: block; animation: fadeIn 0.2s ease-in-out; }
+        .hidden { display: none !important; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .section-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-color); }
+        .section-desc { font-size: 0.95rem; color: var(--gray-text); margin-bottom: 2rem; }
+        .group-title { font-size: 1.1rem; font-weight: 600; margin: 1.8rem 0 1rem 0; color: var(--text-color); border-left: 3px solid #d3d6df; padding-left: 0.5rem; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .st-metric-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02); }
+        .st-metric-label { font-size: 0.85rem; color: var(--gray-text); font-weight: 400; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .st-metric-value { font-size: 1.75rem; font-weight: 700; color: var(--text-color); }
+        .st-metric-delta { font-size: 0.85rem; margin-top: 0.35rem; font-weight: 600; display: flex; align-items: center; gap: 0.2rem; }
+        .st-metric-delta.positive { color: #29b578; }
+        .st-button { background-color: var(--primary-red); color: white; border: 1px solid var(--primary-red); border-radius: 4px; padding: 0.45rem 1rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .st-button:hover { background-color: var(--primary-red-hover); border-color: var(--primary-red-hover); }
+        .placeholder-card { border: 1px dashed #c3c7db; background-color: #fcfdfe; border-radius: 8px; padding: 3rem 2rem; text-align: center; margin-top: 1rem; }
+        .st-form { border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-top: 1rem; background: #ffffff; max-width: 600px; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .st-input, select { width: 100%; padding: 0.5rem; border: 1px solid #d3d6df; border-radius: 4px; font-size: 0.9rem; outline: none; }
+        .st-input:focus, select:focus { border-color: var(--primary-red); box-shadow: 0 0 0 1px var(--primary-red); }
+        .st-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+        .st-table th, .st-table td { border: 1px solid var(--border-color); padding: 0.6rem; text-align: left; }
+        .st-table th { background-color: var(--bg-sidebar); font-weight: 600; }
+        .st-toast { position: fixed; bottom: 25px; right: 25px; background-color: #31333f; color: #ffffff; padding: 0.75rem 1.25rem; border-radius: 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); font-size: 0.9rem; opacity: 0; transform: translateY(10px); transition: all 0.3s ease; z-index: 1001; display: flex; align-items: center; gap: 0.5rem; }
+        .st-toast.show { opacity: 1; transform: translateY(0); }
+        .sidebar-footer { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--border-color); font-size: 0.75rem; color: var(--gray-text); text-align: center; }
         @media (max-width: 820px) {
-            body {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                height: auto;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-                padding: 1rem;
-            }
-            .main-container {
-                padding: 1.5rem;
-            }
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border-color); padding: 1rem; }
+            .main-container { padding: 1.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR (Streamlit Style) -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <h1 class="sidebar-title">✨ MYCARPET PRO <span style="color: var(--primary-red);">v2.0</span></h1>
             <p class="sidebar-subtitle">Sistem Pengurusan & Operasi</p>
         </div>
-
         <nav>
             <ul class="menu-list">
                 <li><button class="menu-item active" onclick="switchTab('dashboard')">📊 Dashboard Utama</button></li>
-                <li><button class="menu-item" onclick="switchTab('janji-temu')">📅 Janji Temu</button></li>
                 <li><button class="menu-item" onclick="switchTab('tempahan-baru')">➕ Tempahan Baru</button></li>
+                <li><button class="menu-item" onclick="switchTab('janji-temu')">📅 Janji Temu</button></li>
                 <li><button class="menu-item" onclick="switchTab('scan-tracking')">🔍 Scan & Tracking QR</button></li>
                 <li><button class="menu-item" onclick="switchTab('pembayaran')">💳 Pembayaran</button></li>
                 <li><button class="menu-item" onclick="switchTab('invois')">🧾 Invois</button></li>
@@ -375,323 +80,178 @@
                 <li><button class="menu-item" onclick="switchTab('kewangan')">💰 Kewangan</button></li>
             </ul>
         </nav>
-
         <div class="sidebar-footer">
             <p>MYCARPET PRO © 2026</p>
             <p style="margin-top: 0.2rem;">Reka Bentuk Berinspirasi Streamlit</p>
         </div>
     </aside>
 
-    <!-- KANDUNGAN UTAMA (Main Content Container) -->
     <main class="main-container">
-
-        <!-- ================= TAB 1: DASHBOARD UTAMA ================= -->
         <section id="dashboard" class="tab-content">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h2 class="section-title">Dashboard Utama</h2>
-                    <p class="section-desc">Paparan data status operasi semasa dan ringkasan jualan masa nyata.</p>
+                    <p class="section-desc">Paparan data status operasi semasa syarikat.</p>
                 </div>
                 <button class="st-button" onclick="simulateDataUpdate()">🔄 Kemaskini Data</button>
             </div>
-
-            <!-- METRIK STATUS OPERASI -->
+            
             <h3 class="group-title">🛠️ Status Operasi Karpet Semasa</h3>
             <div class="metrics-grid">
-                <div class="st-metric-card">
-                    <span class="st-metric-label">Dalam Proses</span>
-                    <span id="val-proses" class="st-metric-value">18</span>
-                    <span class="st-metric-delta positive">▲ 2 baru sahaja masuk</span>
-                </div>
-                <div class="st-metric-card">
-                    <span class="st-metric-label">Pengeringan</span>
-                    <span id="val-kering" class="st-metric-value">12</span>
-                    <span class="st-metric-delta positive">▲ 4 selesai dibasuh</span>
-                </div>
-                <div class="st-metric-card">
-                    <span class="st-metric-label">Ready to Deliver</span>
-                    <span id="val-ready" class="st-metric-value">25</span>
-                    <span class="st-metric-delta positive">▲ 8 sedia untuk penghantaran</span>
-                </div>
-                <div class="st-metric-card">
-                    <span class="st-metric-label">Selesai</span>
-                    <span id="val-selesai" class="st-metric-value">142</span>
-                    <span class="st-metric-delta positive">▲ 15 minggu ini</span>
-                </div>
+                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span id="val-proses" class="st-metric-value">18</span><span class="st-metric-delta positive">▲ 2 baru masuk</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span id="val-kering" class="st-metric-value">12</span><span class="st-metric-delta positive">▲ 4 selesai basuh</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Ready to Deliver</span><span id="val-ready" class="st-metric-value">25</span><span class="st-metric-delta positive">▲ 8 sedia hantar</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Selesai</span><span id="val-selesai" class="st-metric-value">142</span><span class="st-metric-delta positive">▲ 15 minggu ini</span></div>
             </div>
 
-            <!-- METRIK RINGKASAN BASUHAN -->
             <h3 class="group-title">📊 Ringkasan Jumlah Karpet Dibasuh</h3>
             <div class="metrics-grid">
-                <div class="st-metric-card">
-                    <span class="st-metric-label">Bulan Ini</span>
-                    <span id="val-bulan" class="st-metric-value">197 helai</span>
-                    <span class="st-metric-delta positive">▲ +12% vs bulan lepas</span>
-                </div>
-                <div class="st-metric-card">
-                    <span class="st-metric-label">Tahun Ini</span>
-                    <span id="val-tahun" class="st-metric-value">2,104 helai</span>
-                    <span class="st-metric-delta positive">▲ +8.5% peningkatan tahunan</span>
-                </div>
-                <div class="st-metric-card">
-                    <span class="st-metric-label">Sepanjang Waktu</span>
-                    <span id="val-sepanjang" class="st-metric-value">5,840 helai</span>
-                    <span class="st-metric-delta" style="color: var(--gray-text);">Sejak Jan 2024</span>
-                </div>
+                <div class="st-metric-card"><span class="st-metric-label">Bulan Ini</span><span id="val-bulan" class="st-metric-value">197 helai</span><span class="st-metric-delta positive">▲ +12% vs lepas</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Tahun Ini</span><span id="val-tahun" class="st-metric-value">2,104 helai</span><span class="st-metric-delta positive">▲ +8.5% tahunan</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Sepanjang Waktu</span><span id="val-sepanjang" class="st-metric-value">5,840 helai</span><span class="st-metric-delta" style="color: var(--gray-text);">Sejak Jan 2024</span></div>
             </div>
 
-            <!-- METRIK PRESTASI JUALAN -->
             <h3 class="group-title">💰 Prestasi Kewangan & Jualan</h3>
             <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                <div class="st-metric-card" style="border-left: 4px solid var(--primary-red);">
-                    <span class="st-metric-label">Jumlah Jualan Bulan Ini</span>
-                    <span id="val-jualan" class="st-metric-value" style="color: var(--primary-red);">RM 14,850.00</span>
-                    <span class="st-metric-delta positive">▲ +15.2% berbanding KPI sasaran (RM 12k)</span>
-                </div>
-                <div class="st-metric-card">
-                    <span class="st-metric-label">Purata Nilai Setiap Tempahan</span>
-                    <span id="val-purata" class="st-metric-value">RM 75.38</span>
-                    <span class="st-metric-delta positive">▲ +3.4% peningkatan purata bil</span>
-                </div>
+                <div class="st-metric-card" style="border-left: 4px solid var(--primary-red);"><span class="st-metric-label">Jumlah Jualan Bulan Ini</span><span id="val-jualan" class="st-metric-value" style="color: var(--primary-red);">RM 14,850.00</span><span class="st-metric-delta positive">▲ KPI Terlampau</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Purata Nilai Setiap Tempahan</span><span id="val-purata" class="st-metric-value">RM 75.38</span><span class="st-metric-delta positive">▲ +3.4% naik</span></div>
             </div>
         </section>
 
-
-        <!-- ================= TAB 2: JANJI TEMU ================= -->
-        <section id="janji-temu" class="tab-content hidden">
-            <h2 class="section-title">📅 Jadual & Janji Temu</h2>
-            <p class="section-desc">Pengurusan slot janji temu pickup dan penghantaran karpet pelanggan.</p>
-            
-            <div class="placeholder-card">
-                <div class="placeholder-icon">📅</div>
-                <h4>Ruang Pengurusan Janji Temu</h4>
-                <p style="color: var(--gray-text); margin: 0.5rem 0 1.5rem 0; font-size: 0.9rem;">
-                    Anda boleh membina sistem kalendar, jadual slot tempahan, atau log temu janji harian di sini.
-                </p>
-                <button class="st-button-secondary" onclick="triggerToast('Fungsi Janji Temu sedia untuk diintegrasikan')">Eksplorasi Modul</button>
-            </div>
-        </section>
-
-
-        <!-- ================= TAB 3: TEMPAHAN BARU ================= -->
         <section id="tempahan-baru" class="tab-content hidden">
             <h2 class="section-title">➕ Daftar Tempahan Baru</h2>
-            <p class="section-desc">Kemasukan maklumat karpet dan pengiraan automatik harga sebut harga.</p>
-            
             <div class="st-form">
-                <h3 style="margin-bottom:1rem; font-size: 1.1rem;">Borang Tempahan Karpet</h3>
+                <h3 style="margin-bottom:1rem;">Maklumat Pelanggan</h3>
+                <div class="form-group"><label class="form-label">Nama Pelanggan</label><input type="text" id="cust-nama" class="st-input" placeholder="Nama penuh"></div>
+                <div class="form-group"><label class="form-label">No. Telefon</label><input type="text" id="cust-tel" class="st-input" placeholder="0123456789"></div>
+                <div class="form-group"><label class="form-label">Alamat Penghantaran</label><input type="text" id="cust-alamat" class="st-input" placeholder="Alamat lengkap"></div>
+                <hr style="border:0; border-top:1px solid var(--border-color); margin:1.5rem 0;">
+                <h3 style="margin-bottom:1rem;">Tambah Karpet</h3>
                 <div class="form-group">
-                    <label class="form-label">Nama Pelanggan</label>
-                    <input type="text" class="st-input" placeholder="Sila masukkan nama penuh">
+                    <label class="form-label">Pilihan Jenis & Kod Karpet</label>
+                    <select id="pilihan-karpet">
+                        <option value="CK 4X6|CUCIAN CARPET KERAS|28.80">CK 4X6 - CARPET KERAS (RM28.80)</option>
+                        <option value="CN 5X7|CUCIAN CARPET NIPIS|17.50">CN 5X7 - CARPET NIPIS (RM17.50)</option>
+                        <option value="HP 6X8|CUCIAN CARPET HIGH PILE|62.40">HP 6X8 - HIGH PILE (RM62.40)</option>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">No. Telefon</label>
-                    <input type="text" class="st-input" placeholder="Contoh: 0123456789">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Saiz Karpet (Kaki Persegi)</label>
-                    <input type="number" class="st-input" placeholder="Sila masukkan ukuran sqft">
-                </div>
-                <div style="margin-top: 1.5rem;">
-                    <button class="st-button" onclick="triggerToast('Simulasi: Rekod Tempahan Berjaya Disimpan!')">Hantar Tempahan</button>
-                </div>
+                <div class="form-group"><label class="form-label">Kuantiti</label><input type="number" id="item-qty" class="st-input" value="1" min="1"></div>
+                <button class="st-button" type="button" onclick="tambahItemKeSenarai()" style="background-color: #31333f; border-color:#31333f;">➕ Tambah Item</button>
+                <table class="st-table" id="jadual-item">
+                    <thead><tr><th>Kod</th><th>Perkhidmatan</th><th>Harga</th><th>Qty</th><th>Jumlah</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+                <div style="margin-top:1.5rem; text-align:right; font-size:1.1rem; font-weight:700;">Jumlah: <span id="total-harga-skrin" style="color:var(--primary-red);">RM 0.00</span></div>
+                <div style="margin-top: 1.5rem;"><button class="st-button" id="btn-submit" onclick="hantarDataKeGoogleSheets()">🚀 Simpan Tempahan</button></div>
             </div>
         </section>
 
-
-        <!-- ================= TAB 4: SCAN & TRACKING QR ================= -->
-        <section id="scan-tracking" class="tab-content hidden">
-            <h2 class="section-title">🔍 Scan & Tracking QR Code</h2>
-            <p class="section-desc">Imbas kod bar atau kod QR yang melekat pada karpet untuk mengemas kini status operasi dengan pantas.</p>
-            
-            <div class="placeholder-card">
-                <div class="placeholder-icon">📷</div>
-                <h4>Sistem Pengimbas QR</h4>
-                <p style="color: var(--gray-text); margin: 0.5rem 0 1.5rem 0; font-size: 0.9rem;">
-                    Integrasikan perkakasan kamera peranti menggunakan perpustakaan pengimbas kod QR di ruangan ini.
-                </p>
-                <button class="st-button" onclick="triggerToast('Menghubungkan Kamera...')">Aktifkan Kamera</button>
-            </div>
-        </section>
-
-
-        <!-- ================= TAB 5: PEMBAYARAN ================= -->
-        <section id="pembayaran" class="tab-content hidden">
-            <h2 class="section-title">💳 Transaksi & Pembayaran</h2>
-            <p class="section-desc">Urus kaedah pembayaran pelanggan, pengesahan resit, dan penyepaduan gateway.</p>
-            
-            <div class="placeholder-card">
-                <div class="placeholder-icon">💳</div>
-                <h4>Sistem Transaksi Pembayaran</h4>
-                <p style="color: var(--gray-text); margin: 0.5rem 0 1.5rem 0; font-size: 0.9rem;">
-                    Halaman untuk memproses pembayaran tunai, pemindahan bank, e-Wallet, atau FPX.
-                </p>
-                <button class="st-button-secondary" onclick="triggerToast('Menghubungkan Terminal Pembayaran...')">Semak Terminal</button>
-            </div>
-        </section>
-
-
-        <!-- ================= TAB 6: INVOIS ================= -->
-        <section id="invois" class="tab-content hidden">
-            <h2 class="section-title">🧾 Penjanaan Invois</h2>
-            <p class="section-desc">Cipta, kongsi, dan cetak bil invois rasmi terus kepada pelanggan melalui WhatsApp atau emel.</p>
-            
-            <div class="placeholder-card">
-                <div class="placeholder-icon">🧾</div>
-                <h4>Template & Arkib Invois</h4>
-                <p style="color: var(--gray-text); margin: 0.5rem 0 1.5rem 0; font-size: 0.9rem;">
-                    Reka struktur cetakan PDF invois automatik mengikut standard syarikat anda di panel ini.
-                </p>
-                <button class="st-button" onclick="triggerToast('Menjana pratonton invois contoh...')">Muat Turun Contoh PDF</button>
-            </div>
-        </section>
-
-
-        <!-- ================= TAB 7: KATALOG HARGA ================= -->
-        <section id="katalog-harga" class="tab-content hidden">
-            <h2 class="section-title">🏷️ Katalog Harga Servis</h2>
-            <p class="section-desc">Tetapan kadar caj mengikut ketebalan, jenis karpet, berat, atau rawatan khusus.</p>
-            
-            <div class="placeholder-card">
-                <div class="placeholder-icon">🏷️</div>
-                <h4>Jadual Struktur Harga Servis</h4>
-                <p style="color: var(--gray-text); margin: 0.5rem 0 1.5rem 0; font-size: 0.9rem;">
-                    Daftar kadar harga (seperti RM/sqft atau harga rata bagi selimut/karpet) untuk rujukan sistem kasir.
-                </p>
-                <button class="st-button-secondary" onclick="triggerToast('Buka pengurusan inventori...')">Kemaskini Harga</button>
-            </div>
-        </section>
-
-
-        <!-- ================= TAB 8: CETAK BARCODE ================= -->
-        <section id="cetak-barcode" class="tab-content hidden">
-            <h2 class="section-title">🏷️ Cetakan Tag Barcode</h2>
-            <p class="section-desc">Cetak tag fizikal kalis air untuk digantung pada karpet bagi tujuan pengecaman logistik.</p>
-            
-            <div class="placeholder-card">
-                <div class="placeholder-icon">🏷️</div>
-                <h4>Zon Generator Kod Bar / Barcode</h4>
-                <p style="color: var(--gray-text); margin: 0.5rem 0 1.5rem 0; font-size: 0.9rem;">
-                    Sambungkan mesin pencetak haba (thermal printer) atau cetak terus ke kertas label pelekat bersaiz standard.
-                </p>
-                <button class="st-button" onclick="triggerToast('Menyediakan modul cetakan thermal...')">Cetak Label Ujian</button>
-            </div>
-        </section>
-
-
-        <!-- ================= TAB 9: KEWANGAN ================= -->
-        <section id="kewangan" class="tab-content hidden">
-            <h2 class="section-title">💰 Prestasi & Analitis Kewangan</h2>
-            <p class="section-desc">Laporan untung rugi, kos bahan kimia (sabun), perbelanjaan utiliti, dan baki aliran tunai.</p>
-            
-            <div class="placeholder-card">
-                <div class="placeholder-icon">📈</div>
-                <h4>Graf Aliran Tunai & Untung Rugi</h4>
-                <p style="color: var(--gray-text); margin: 0.5rem 0 1.5rem 0; font-size: 0.9rem;">
-                    Paparkan graf analisis jualan, margin bersih, kos utiliti, dan peratusan pertumbuhan bulanan.
-                </p>
-                <button class="st-button" onclick="triggerToast('Membuka laporan kewangan suku tahun...')">Lihat Analisis Penuh</button>
-            </div>
-        </section>
-
+        <section id="janji-temu" class="tab-content hidden"><h2>📅 Jadual & Janji Temu</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="scan-tracking" class="tab-content hidden"><h2>🔍 Scan & Tracking QR Code</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="pembayaran" class="tab-content hidden"><h2>💳 Transaksi & Pembayaran</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="invois" class="tab-content hidden"><h2>🧾 Penjanaan Invois</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="katalog-harga" class="tab-content hidden"><h2>🏷️ Katalog Harga Servis</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="cetak-barcode" class="tab-content hidden"><h2>🏷️ Cetakan Tag Barcode</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="kewangan" class="tab-content hidden"><h2>💰 Prestasi & Analitis Kewangan</h2><p class="placeholder-card">Modul siap sedia.</p></section>
     </main>
-
-    <!-- LOGIK JAVASCRIPT (Tab Switching & Toast System) -->
     <script>
-        /**
-         * Fungsi Penukaran Tab Halaman (Sidebar Navigation)
-         */
+        const API_URL = "https://google.com";
+        let senaraiMembeli = [];
+
         function switchTab(tabId) {
-            // Sembunyikan semua kandung tab
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(tab => {
-                tab.classList.add('hidden');
-            });
-
-            // Paparkan tab yang dipilih sahaja
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             const activeTab = document.getElementById(tabId);
-            if (activeTab) {
-                activeTab.classList.remove('hidden');
-            }
+            if (activeTab) activeTab.classList.remove('hidden');
 
-            // Buang kelas aktif dari semua butang sidebar
             const menuButtons = document.querySelectorAll('.menu-item');
-            menuButtons.forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Letakkan kelas aktif pada butang yang diclik
-            const activeBtn = Array.from(menuButtons).find(btn => {
-                return btn.getAttribute('onclick').includes(`'${tabId}'`);
-            });
-            if (activeBtn) {
-                activeBtn.classList.add('active');
-            }
+            menuButtons.forEach(btn => btn.classList.remove('active'));
+            const activeBtn = Array.from(menuButtons).find(btn => btn.getAttribute('onclick').includes(`'${tabId}'`));
+            if (activeBtn) activeBtn.classList.add('active');
         }
 
-        /**
-         * Sistem Notifikasi Terbina-Dalam (Simulasi st.toast)
-         */
         function triggerToast(message) {
-            // Hapuskan sebarang toast lama sekiranya ada
             const existingToast = document.querySelector('.st-toast');
-            if (existingToast) {
-                existingToast.remove();
-            }
-
-            // Cipta elemen toast baharu
+            if (existingToast) existingToast.remove();
             const toast = document.createElement('div');
             toast.className = 'st-toast';
             toast.innerHTML = `<span>ℹ️</span> <span>${message}</span>`;
             document.body.appendChild(toast);
-
-            // Paparkan animasi muncul
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 50);
-
-            // Sembunyikan dan padam semula toast selepas 3.5 saat
+            setTimeout(() => toast.classList.add('show'), 50);
             setTimeout(() => {
                 toast.classList.remove('show');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
+                setTimeout(() => toast.remove(), 300);
             }, 3500);
         }
 
-        /**
-         * Simulasi Kemaskini Data secara Rawak (Fungsi Logik Dashboard)
-         */
+        function tambahItemKeSenarai() {
+            const rawData = document.getElementById('pilihan-karpet').value.split('|');
+            const qty = parseInt(document.getElementById('item-qty').value) || 1;
+            const item = { kod: rawData[0], jenis: rawData[1], harga: parseFloat(rawData[2]), qty: qty };
+            senaraiMembeli.push(item);
+            kemaskiniJadualSkrin();
+        }
+
+        function kemaskiniJadualSkrin() {
+            const tbody = document.querySelector('#jadual-item tbody');
+            tbody.innerHTML = "";
+            let total = 0;
+            senaraiMembeli.forEach(item => {
+                const subtotal = item.harga * item.qty;
+                total += subtotal;
+                tbody.innerHTML += `<tr><td>${item.kod}</td><td>${item.jenis}</td><td>RM ${item.harga.toFixed(2)}</td><td>${item.qty}</td><td>RM ${subtotal.toFixed(2)}</td></tr>`;
+            });
+            document.getElementById('total-harga-skrin').innerText = "RM " + total.toFixed(2);
+        }
+
+        function hantarDataKeGoogleSheets() {
+            const nama = document.getElementById('cust-nama').value;
+            const tel = document.getElementById('cust-tel').value;
+            const alamat = document.getElementById('cust-alamat').value;
+            if (!nama || !tel || senaraiMembeli.length === 0) {
+                alert("Sila isi Nama, No Telefon dan tambah sekurang-kurangnya 1 item!");
+                return;
+            }
+            const btn = document.getElementById('btn-submit');
+            btn.innerText = "⏳ Sedang Menyimpan...";
+            btn.disabled = true;
+            let totalHarga = senaraiMembeli.reduce((sum, item) => sum + (item.harga * item.qty), 0);
+            const payload = { action: "tambah_tempahan", nama: nama, telefon: tel, alamat: alamat, total_harga: totalHarga, items: senaraiMembeli };
+
+            fetch(API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                triggerToast("✅ Rekod Berjaya Disimpan ke Google Sheets!");
+                document.getElementById('cust-nama').value = "";
+                document.getElementById('cust-tel').value = "";
+                document.getElementById('cust-alamat').value = "";
+                senaraiMembeli = [];
+                kemaskiniJadualSkrin();
+                btn.innerText = "🚀 Simpan Tempahan";
+                btn.disabled = false;
+                switchTab('dashboard');
+            }).catch(err => {
+                console.error(err);
+                alert("Ralat berlaku!");
+                btn.innerText = "🚀 Simpan Tempahan";
+                btn.disabled = false;
+            });
+        }
+
         function simulateDataUpdate() {
-            // Variasi nilai rawak secara simulasi logik
-            const changeProses = Math.floor(Math.random() * 5) - 2; // -2 hingga +2
-            const changeKering = Math.floor(Math.random() * 4) - 2; 
-            const changeReady = Math.floor(Math.random() * 6) - 2; 
-            const changeSelesai = Math.floor(Math.random() * 8) + 1; // Sentiasa bertambah
-
-            // Baca nilai lama
-            const valProses = Math.max(5, parseInt(document.getElementById('val-proses').innerText) + changeProses);
-            const valKering = Math.max(3, parseInt(document.getElementById('val-kering').innerText) + changeKering);
-            const valReady = Math.max(8, parseInt(document.getElementById('val-ready').innerText) + changeReady);
+            const changeSelesai = Math.floor(Math.random() * 8) + 1;
             const valSelesai = parseInt(document.getElementById('val-selesai').innerText) + changeSelesai;
-
-            // Kemas kini paparan
-            document.getElementById('val-proses').innerText = valProses;
-            document.getElementById('val-kering').innerText = valKering;
-            document.getElementById('val-ready').innerText = valReady;
             document.getElementById('val-selesai').innerText = valSelesai;
 
-            // Kemas kini ringkasan basuhan bulan ini
             const rawBulanVal = parseInt(document.getElementById('val-bulan').innerText);
             document.getElementById('val-bulan').innerText = (rawBulanVal + changeSelesai) + ' helai';
 
-            // Kemas kini jumlah jualan bulan ini
             const rawJualanVal = parseFloat(document.getElementById('val-jualan').innerText.replace('RM ', '').replace(',', ''));
-            const untungBaru = changeSelesai * 75.38; // Menggunakan nilai purata jualan karpet
-            const jualanBaharu = rawJualanVal + untungBaru;
+            const jualanBaharu = rawJualanVal + (changeSelesai * 75.38);
             document.getElementById('val-jualan').innerText = 'RM ' + jualanBaharu.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-            triggerToast('Data operasi MYCARPET PRO v2.0 telah dikemaskini!');
+            triggerToast('Data operasi berjaya dikemaskini!');
         }
     </script>
 </body>
