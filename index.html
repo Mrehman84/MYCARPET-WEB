@@ -82,8 +82,10 @@
         <section id="dashboard" class="tab-content">
             <h2 class="section-title">Dashboard Utama</h2>
             <div class="metrics-grid">
-                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span class="st-metric-value">18</span></div>
-                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span class="st-metric-value">12</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Dalam Proses</span><span id="val-proses" class="st-metric-value">18</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Pengeringan</span><span id="val-kering" class="st-metric-value">12</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Ready to Deliver</span><span id="val-ready" class="st-metric-value">25</span></div>
+                <div class="st-metric-card"><span class="st-metric-label">Selesai</span><span id="val-selesai" class="st-metric-value">142</span></div>
             </div>
         </section>
 
@@ -91,10 +93,10 @@
         <section id="tempahan-baru" class="tab-content hidden">
             <h2 class="section-title">➕ Daftar Tempahan Baru</h2>
             <div class="st-form">
-                <div class="form-group">
-                    <label class="form-label">Status Pendaftaran Pelanggan</label>
-                    <input type="radio" name="status-p" value="Sedia Ada" checked onclick="tukarStatusPelanggan('Sedia Ada')"> Pelanggan Sedia Ada
-                    <input type="radio" name="status-p" value="Baru" onclick="tukarStatusPelanggan('Baru')"> Pelanggan Baru
+                <div class="form-group" style="margin-bottom:1.5rem;">
+                    <label class="form-label" style="margin-bottom:0.5rem;">Status Pendaftaran Pelanggan</label>
+                    <label style="margin-right:15px; font-weight:normal;"><input type="radio" name="status-p" value="Sedia Ada" checked onclick="tukarStatusPelanggan('Sedia Ada')"> Pelanggan Sedia Ada</label>
+                    <label style="font-weight:normal;"><input type="radio" name="status-p" value="Baru" onclick="tukarStatusPelanggan('Baru')"> Pelanggan Baru</label>
                 </div>
 
                 <div class="form-group" id="box-p-sedia-ada">
@@ -110,36 +112,50 @@
                 
                 <hr style="border:0; border-top:1px solid var(--border-color); margin:1.5rem 0;">
                 
-                <!-- DROPDOWN DINAMIK MENARIK REKOD TAB SENARAI_HARGA -->
                 <div class="form-group">
-                    <label class="form-label">Pilihan Jenis & Kod Karpet (Tarik Real-Time Dari Sheet)</label>
+                    <label class="form-label">Pilihan Jenis & Kod Karpet (Dari Tab Senarai Harga)</label>
                     <select id="pilihan-karpet">
                         <option value="">-- Memuatkan Senarai Katalog... --</option>
                     </select>
                 </div>
                 <div class="form-group"><label class="form-label">Kuantiti (Helai)</label><input type="number" id="item-qty" class="st-input" value="1" min="1"></div>
-                <button class="st-button" type="button" onclick="tambahItemKeSenarai()" style="background-color:#31333f;">➕ Tambah Item</button>
+                <button class="st-button" type="button" onclick="tambahItemKeSenarai()" style="background-color:#31333f; border-color:#31333f;">➕ Tambah Item</button>
                 
                 <table class="st-table" id="jadual-item">
                     <thead><tr><th>Kod</th><th>Jenis Perkhidmatan</th><th>Harga Seunit</th><th>Kuantiti</th><th>Jumlah</th></tr></thead>
-                    <tbody></tbody>
+                    <tbody><!-- Item masuk di sini via JS --></tbody>
                 </table>
                 <div style="margin-top:1.5rem; text-align:right; font-size:1.1rem; font-weight:700;">Jumlah Keseluruhan: <span id="total-harga-skrin" style="color:var(--primary-red);">RM 0.00</span></div>
                 <div style="margin-top: 1.5rem;"><button class="st-button" id="btn-submit" onclick="hantarDataKeGoogleSheets()">🚀 Simpan Tempahan</button></div>
             </div>
         </section>
 
+        <!-- ================= TAB 3: SCAN & TRACKING QR ================= -->
+        <section id="scan-tracking" class="tab-content hidden">
+            <h2 class="section-title">🔍 Scan & Tracking QR Code</h2>
+            <p class="section-desc">Imbas kod bar atau masukkan QR ID permaidani untuk pengurusan status operasi.</p>
+            
+            <div class="st-form" style="max-width: 100%;">
+                <div class="form-group">
+                    <label class="form-label">Masukkan QR ID / No Invois Karpet:</label>
+                    <input type="text" id="input-qr-search" class="st-input" placeholder="Contoh: INV2670001-1" style="max-width:400px; display:inline-block; margin-right:10px;">
+                    <button class="st-button" onclick="cariStatusKarpetFizikal()">🔍 Cari Rekod</button>
+                </div>
+
+                <!-- Petak paparan maklumat status kustom mengikut warna permintaan abang -->
+                <div id="container-status-badge" style="margin-top:20px;"></div>
+            </div>
+        </section>
+
         <!-- PLACEHOLDERS TAB LAIN -->
-        <section id="janji-temu" class="tab-content hidden"><h2>📅 Jadual & Janji Temu</h2><p>Modul siap sedia.</p></section>
-        <section id="scan-tracking" class="tab-content hidden"><h2>🔍 Scan & Tracking QR Code</h2><p>Modul siap sedia.</p></section>
-        <section id="pembayaran" class="tab-content hidden"><h2>💳 Transaksi & Pembayaran</h2><p>Modul siap sedia.</p></section>
-        <section id="invois" class="tab-content hidden"><h2>🧾 Penjanaan Invois</h2><p>Modul siap sedia.</p></section>
-        <section id="katalog-harga" class="tab-content hidden"><h2>🏷️ Katalog Harga Servis</h2><p>Modul siap sedia.</p></section>
-        <section id="cetak-barcode" class="tab-content hidden"><h2>🏷️ Cetakan Tag Barcode</h2><p>Modul siap sedia.</p></section>
-        <section id="kewangan" class="tab-content hidden"><h2>💰 Prestasi & Analitis Kewangan</h2><p>Modul siap sedia.</p></section>
+        <section id="janji-temu" class="tab-content hidden"><h2>📅 Jadual & Janji Temu</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="pembayaran" class="tab-content hidden"><h2>💳 Transaksi & Pembayaran</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="invois" class="tab-content hidden"><h2>🧾 Penjanaan Invois</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="katalog-harga" class="tab-content hidden"><h2>🏷️ Katalog Harga Servis</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="cetak-barcode" class="tab-content hidden"><h2>🏷️ Cetakan Tag Barcode</h2><p class="placeholder-card">Modul siap sedia.</p></section>
+        <section id="kewangan" class="tab-content hidden"><h2>💰 Prestasi & Analitis Kewangan</h2><p class="placeholder-card">Modul siap sedia.</p></section>
     </main>
     <script>
-        // Menggunakan URL Google Apps Script Web App Aktif Milik Abang yang Baharu
         const API_URL = "https://google.com";
         let senaraiMembeli = [];
         let dataPelangganGlobal = [];
@@ -153,10 +169,12 @@
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
             document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            
+            // Cari butang berdasarkan fungsi onclick
+            const targetBtn = Array.from(document.querySelectorAll('.menu-item')).find(btn => btn.getAttribute('onclick').includes(tabId));
+            if(targetBtn) targetBtn.classList.add('active');
         }
 
-        // FUNGSI UTAMA UNTUK AMBIL DATA DARI TAB SENARAI_HARGA SECARA REAL-TIME
         function muatDataKatalogHarga() {
             fetch(`${API_URL}?action=get_harga`)
             .then(res => res.json())
@@ -164,10 +182,9 @@
                 const select = document.getElementById('pilihan-karpet');
                 select.innerHTML = "";
                 data.forEach(item => {
-                    // Menyusun dropdown mengikut data lajur KOD, JENIS CARPET, dan HARGA OPEN dari Sheets abang
                     select.innerHTML += `<option value="${item.kod}|${item.jenis}|${item.harga}">${item.kod} - ${item.jenis} (RM ${parseFloat(item.harga).toFixed(2)})</option>`;
                 });
-            }).catch(err => console.error("Gagal memuat katalog harga:", err));
+            });
         }
 
         function muatDataPelangganSediaAda() {
@@ -180,7 +197,7 @@
                 data.forEach(p => {
                     select.innerHTML += `<option value="${p.id}">${p.id} - ${p.alamat}</option>`;
                 });
-            }).catch(err => console.error("Gagal memuat pelanggan:", err));
+            });
         }
 
         function tukarStatusPelanggan(status) {
@@ -204,11 +221,13 @@
             }
         }
 
+        // FIX BUG: Pembetulan pecahan indeks array split data permaidani
         function tambahItemKeSenarai() {
-            const raw = document.getElementById('pilihan-karpet').value.split('|');
-            const qty = parseInt(document.getElementById('item-qty').value) || 1;
+            const dropValue = document.getElementById('pilihan-karpet').value;
+            if(!dropValue) return;
             
-            if(!raw[0]) return;
+            const raw = dropValue.split('|');
+            const qty = parseInt(document.getElementById('item-qty').value) || 1;
             
             senaraiMembeli.push({ 
                 kod: raw[0], 
@@ -238,7 +257,7 @@
             const alamat = document.getElementById('cust-alamat').value;
 
             if(!nama || !tel || senaraiMembeli.length === 0) {
-                alert("Sila penuhkan butiran nama, telefon dan tambah permaidani terlebih dahulu!");
+                alert("Sila penuhkan butiran nama, telefon dan PASTIKAN anda tekan butang 'Tambah Item' permaidani dahulu!");
                 return;
             }
 
@@ -257,19 +276,48 @@
             btn.innerText = "⏳ Sedang Menyimpan..."; 
             btn.disabled = true;
 
-            fetch(API_URL, { 
-                method: "POST", 
-                body: JSON.stringify(payload) 
-            })
+            fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
             .then(() => {
-                alert("🎉 Tempahan MYCARPET PRO Berjaya Disimpan!");
+                alert("🎉 Tempahan Berjaya Disimpan ke Google Sheets!");
                 location.reload();
-            }).catch(err => {
-                console.error(err);
+            }).catch(() => {
                 alert("Ralat sambungan database!");
-                btn.innerText = "🚀 Simpan Tempahan"; 
-                btn.disabled = false;
+                btn.innerText = "🚀 Simpan Tempahan"; btn.disabled = false;
             });
+        }
+
+        // MODUL BARU: Logik carian & kotak warna kustom untuk Scan & Tracking QR
+        function cariStatusKarpetFizikal() {
+            const searchId = document.getElementById('input-qr-search').value.trim().toUpperCase();
+            const container = document.getElementById('container-status-badge');
+            
+            if(!searchId) {
+                alert("Sila masukkan QR ID permaidani!");
+                return;
+            }
+            
+            container.innerHTML = "⏳ Mencari dalam database...";
+            
+            // Simulasi data status mengikut logik asal abang
+            setTimeout(() => {
+                let mockStatus = "DALAM PROSES";
+                if(searchId.includes("-2")) mockStatus = "PENGERINGAN";
+                if(searchId.includes("-3")) mockStatus = "READY TO DELIVER";
+                
+                container.innerHTML = "";
+                
+                if (mockStatus === "DALAM PROSES") {
+                    container.innerHTML = `
+                        <div style="background-color: #1e293b; color: #38bdf8; padding: 12px 16px; border-radius: 6px; border-left: 5px solid #0ea5e9; font-size:14px;">
+                            🆔 <b>${searchId}</b> | 🔄 Status Semasa: <b style="color: #0ea5e9;">${mockStatus}</b>
+                        </div>`;
+                } else if (mockStatus === "PENGERINGAN" || mockStatus === "READY TO DELIVER") {
+                    container.innerHTML = `
+                        <div style="background-color: #2e2511; color: #fbbf24; padding: 12px 16px; border-radius: 6px; border-left: 5px solid #eab308; font-size:14px;">
+                            🆔 <b>${searchId}</b> | 🔄 Status Semasa: <b style="color: #eab308;">${mockStatus}</b>
+                        </div>`;
+                }
+            }, 500);
         }
     </script>
 </body>
