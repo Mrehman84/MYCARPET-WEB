@@ -315,7 +315,13 @@
             DATA_MASTER.pelanggan.forEach(c => {
                 let opt = document.createElement('option');
                 opt.value = c["CUSTOMER ID"];
-                opt.textContent = `${c["NAMA"].toUpperCase()} (${c["TELEFON"]})`;
+                
+                // Ambil alamat dan daerah jika wujud, jika kosong kita letak tanda "-"
+                let alamatRingkas = c["ALAMAT"] ? c["ALAMAT"] : "-";
+                let daerahRingkas = c["DAERAH"] ? `, ${c["DAERAH"]}` : "";
+                
+                // FORMAT BAHARU: ID Pelanggan - Alamat Rumah, Daerah
+                opt.textContent = `${c["CUSTOMER ID"]} - ${alamatRingkas}${daerahRingkas}`;
                 select.appendChild(opt);
             });
         }
