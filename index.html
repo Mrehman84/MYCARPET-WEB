@@ -309,22 +309,22 @@
                 clearCustomerFormInputs();
             }
         }
-        function populateCustomerDropdown() {
-            const select = document.getElementById('optPelanggan');
-            select.innerHTML = '<option value="">-- Sila Pilih Pelanggan --</option>';
-            DATA_MASTER.pelanggan.forEach(c => {
-                let opt = document.createElement('option');
-                opt.value = c["CUSTOMER ID"];
-                
-                // Ambil alamat dan daerah jika wujud, jika kosong kita letak tanda "-"
-                let alamatRingkas = c["ALAMAT"] ? c["ALAMAT"] : "-";
-                let daerahRingkas = c["DAERAH"] ? `, ${c["DAERAH"]}` : "";
-                
-                // FORMAT BAHARU: ID Pelanggan - Alamat Rumah, Daerah
-                opt.textContent = `${c["CUSTOMER ID"]} - ${alamatRingkas}${daerahRingkas}`;
-                select.appendChild(opt);
-            });
-        }
+       function populateCustomerDropdown() {
+    const select = document.getElementById('optPelanggan');
+    select.innerHTML = '<option value="">-- Sila Pilih Pelanggan --</option>';
+    DATA_MASTER.pelanggan.forEach(c => {
+        let opt = document.createElement('option');
+        opt.value = c["CUSTOMER ID"];
+        
+        let alamatRingkas = c["ALAMAT"] ? c["ALAMAT"] : "Tiada Alamat";
+        let daerahRingkas = c["DAERAH"] ? `, ${c["DAERAH"]}` : "";
+        
+        // FORMAT: ID Pelanggan - Alamat Rumah, Daerah
+        opt.textContent = `${c["CUSTOMER ID"]} - ${alamatRingkas}${daerahRingkas}`;
+        select.appendChild(opt);
+    });
+}
+
 
         function loadCustomerDetails() {
             const id = document.getElementById('optPelanggan').value;
@@ -344,29 +344,60 @@
         }
 
         let carpetRowCount = 0;
-        function addCarpetRow() {
-            carpetRowCount++;
-            const container = document.getElementById('carpetItemsContainer');
-            let htmlOptions = '<option value="">-- Pilih Kod Produk --</option>';
-            DATA_MASTER.senaraiHarga.forEach(p => {
-                let codeClean = p["KOD"].replace(/\s+/g, ' ').trim().toUpperCase();
-                htmlOptions += `<option value="${codeClean}" data-desc="${p["JENIS CARPET"]}" data-price="${p["HARGA OPEN"]}">${codeClean} - ${p["JENIS CARPET"]}</option>`;
-            });
-
-            const rowId = `carpetRow_${carpetRowCount}`;
-            const elementRow = document.createElement('div');
-            elementRow.className = 'row card-item-row';
-            elementRow.id = rowId;
-            elementRow.style.padding = '15px'; elementRow.style.background = '#fcfcfc'; elementRow.style.border = '1px solid #edf2f7'; elementRow.style.borderRadius = '8px'; elementRow.style.marginBottom = '12px';
-
-            elementRow.innerHTML = `
-                <div class="col form-group" style="flex:1.5;"><label>Kod Karpet / Jenis</label><select class="form-control select-kod-karpet" onchange="handleCarpetCodeSelection('${rowId}')">${htmlOptions}</select></div>
-                <div class="col form-group sub-custom-dimensions" style="display:none; max-width: 260px;"><label>Dimensi L x P (Kaki)</label><div style="display:flex; gap:5px; align-items:center;"><input type="number" class="form-control inp-width" placeholder="L" onkeyup="calculateRowTotalPrice('${rowId}')"><span>x</span><input type="number" class="form-control inp-height" placeholder="P" onkeyup="calculateRowTotalPrice('${rowId}')"></div></div>
-                <div class="col form-group" style="max-width: 150px;"><label>Harga (RM)</label><input type="number" class="form-control inp-harga-final" value="0.00" readonly style="font-weight:600; background:#edf2f7;"></div>
-                <div style="display:flex; align-items:center; margin-top:5px;"><button class="btn btn-danger" style="padding:10px 12px;" onclick="removeCarpetRow('${rowId}')"><i class="fa-solid fa-trash"></i></button></div>
-            `;
-            container.appendChild(elementRow);
+function addCarpetRow() {
+    carpetRowCount++;
+    const container = document.getElementById('carpetItemsContainer');
+    
+    // PENGUKUHAN DI SINI: Memastikan data "KOD", "JENIS CARPET", dan "HARGA OPEN" dipadankan dengan betul
+    let htmlOptions = '<option value="">-- Pilih Kod Produk --</option>';
+    DATA_MASTER.senaraiHarga.forEach(p => {
+        // Ambil data kod, jenis karpet dan harga open secara selamat
+        let kodProduk = p["KOD"] ? String(p["KOD"]).replace(/\s+/g, ' ').trim().toUpperCase() : "";
+        let jenisKarpet = p["JENIS CARPET"] ? String(p["JENIS CARPET"]).trim() : "TIADA NAMA";
+        let hargaAsas = p["HARGA OPEN"] ? parseFloat(p["HARGA OPEN"]) : 0;
+        
+        if (kodProduk !== "") {
+            htmlOptions += `<option value="${kodProduk}" data-desc="${jenisKarpet}" data-price="${hargaAsas}">${kodProduk} - ${jenisKarpet}</option>`;
         }
+    });
+
+    const rowId = `carpetRow_${carpetRowCount}`;
+    const elementRow = document.createElement('div');
+    elementRow.className = 'row card-item-row';
+    elementRow.id = rowId;
+    elementRow.style.padding = '15px';
+    elementRow.style.background = '#fcfcfc';
+    elementRow.style.border = '1px solid #edf2f7';
+    elementRow.style.borderRadius = '8px';
+    elementRow.style.marginBottom = '12px';
+    elementRow.style.position = 'relative';
+
+    elementRow.innerHTML = `
+        <div class="col form-group" style="flex:1.5;">
+            <label>Kod Karpet / Jenis</label>
+            <select class="form-control select-kod-karpet" onchange="handleCarpetCodeSelection('${rowId}')">
+                ${htmlOptions}
+            </select>
+        </div>
+        <div class="col form-group sub-custom-dimensions" style="display:none; max-width: 260px;">
+            <label>Dimensi Lebar x Panjang (Kaki)</label>
+            <div style="display:flex; gap:5px; align-items:center;">
+                <input type="number" class="form-control inp-width" placeholder="L" style="text-align:center;" onkeyup="calculateRowTotalPrice('${rowId}')">
+                <span>x</span>
+                <input type="number" class="form-control inp-height" placeholder="P" style="text-align:center;" onkeyup="calculateRowTotalPrice('${rowId}')">
+            </div>
+        </div>
+        <div class="col form-group" style="max-width: 150px;">
+            <label>Harga Sehelai (RM)</label>
+            <input type="number" class="form-control inp-harga-final" value="0.00" readonly style="font-weight:600; background:#edf2f7;">
+        </div>
+        <div style="display:flex; align-items:center; margin-top:5px;">
+            <button class="btn btn-danger" style="padding:10px 12px;" onclick="removeCarpetRow('${rowId}')"><i class="fa-solid fa-trash"></i></button>
+        </div>
+    `;
+    container.appendChild(elementRow);
+}
+
 
         function removeCarpetRow(rowId) {
             const rows = document.querySelectorAll('.card-item-row');
