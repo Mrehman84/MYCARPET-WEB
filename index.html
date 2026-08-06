@@ -343,16 +343,14 @@
             document.getElementById('optPelanggan').value = "";
         }
 
-        let carpetRowCount = 0;
+let carpetRowCount = 0;
 function addCarpetRow() {
     carpetRowCount++;
     const container = document.getElementById('carpetItemsContainer');
     
-    // PENGUKUHAN DI SINI: Memastikan data "KOD", "JENIS CARPET", dan "HARGA OPEN" dipadankan dengan betul
     let htmlOptions = '<option value="">-- Pilih Kod Produk --</option>';
     DATA_MASTER.senaraiHarga.forEach(p => {
-        // Ambil data kod, jenis karpet dan harga open secara selamat
-        let kodProduk = p["KOD"] ? String(p["KOD"]).replace(/\s+/g, ' ').trim().toUpperCase() : "";
+        let kodProduk = p["KOD"] ? String(p["KOD"]).trim().toUpperCase() : "";
         let jenisKarpet = p["JENIS CARPET"] ? String(p["JENIS CARPET"]).trim() : "TIADA NAMA";
         let hargaAsas = p["HARGA OPEN"] ? parseFloat(p["HARGA OPEN"]) : 0;
         
@@ -387,9 +385,10 @@ function addCarpetRow() {
                 <input type="number" class="form-control inp-height" placeholder="P" style="text-align:center;" onkeyup="calculateRowTotalPrice('${rowId}')">
             </div>
         </div>
+        <!-- KEMAS KINI DI SINI: Membuang 'readonly' supaya harga boleh ditaip/diedit secara manual oleh staf -->
         <div class="col form-group" style="max-width: 150px;">
             <label>Harga Sehelai (RM)</label>
-            <input type="number" class="form-control inp-harga-final" value="0.00" readonly style="font-weight:600; background:#edf2f7;">
+            <input type="number" class="form-control inp-harga-final" value="0.00" step="0.01" onkeyup="calculateGrandTotal()" style="font-weight:600; background:#ffffff;">
         </div>
         <div style="display:flex; align-items:center; margin-top:5px;">
             <button class="btn btn-danger" style="padding:10px 12px;" onclick="removeCarpetRow('${rowId}')"><i class="fa-solid fa-trash"></i></button>
@@ -399,6 +398,7 @@ function addCarpetRow() {
 }
 
 
+
         function removeCarpetRow(rowId) {
             const rows = document.querySelectorAll('.card-item-row');
             if(rows.length > 1) { document.getElementById(rowId).remove(); calculateGrandTotal(); }
@@ -406,14 +406,25 @@ function addCarpetRow() {
         }
 
         function handleCarpetCodeSelection(rowId) {
-            const row = document.getElementById(rowId);
-            const selectEl = row.querySelector('.select-kod-karpet');
-            const customSec = row.querySelector('.sub-custom-dimensions');
-            const priceInp = row.querySelector('.inp-harga-final');
-            const selectedOpt = selectEl.options[selectEl.selectedIndex];
-            if(selectEl.value === "CUSTOM") { customSec.style.display = 'block'; calculateRowTotalPrice(rowId); }
-            else { customSec.style.display = 'none'; priceInp.value = (parseFloat(selectedOpt.getAttribute('data-price')) || 0).toFixed(2); calculateGrandTotal(); }
-        }
+    const row = document.getElementById(rowId);
+    const selectEl = row.querySelector('.select-kod-karpet');
+    const customSec = row.querySelector('.sub-custom-dimensions');
+    const priceInp = row.querySelector('.inp-harga-final');
+    
+    const selectedOpt = selectEl.options[selectEl.selectedIndex];
+    const kod = selectEl.value;
+
+    if (kod === "CUSTOM") {
+        customSec.style.display = 'block';
+        calculateRowTotalPrice(rowId);
+    } else {
+        customSec.style.display = 'none';
+        const basePrice = parseFloat(selectedOpt.getAttribute('data-price')) || 0;
+        priceInp.value = basePrice.toFixed(2);
+        calculateGrandTotal();
+    }
+}
+
         function calculateRowTotalPrice(rowId) {
             const row = document.getElementById(rowId);
             const selectEl = row.querySelector('.select-kod-karpet');
