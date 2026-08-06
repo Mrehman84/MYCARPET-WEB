@@ -261,7 +261,7 @@
     </main>
     <script>
         // Sila gantikan URL di bawah dengan pautan Web App Google Apps Script anda yang sebenar
-        const GAS_API_URL = "https://script.google.com//a/*/macros/s/AKfycbytbLdYwbW5HHNufT6XSH_OtuKNPjvaZ7U-rVa3OYfz0ohzj4SkxCYzco5G0AKpgqU/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxG1fDrDHW_IRIlUEO_cxK9pkeI9xgddeUVgNq6vAlmewwp9LmwU0p8lvhElhi_-EUW/exec";
 
         let DATA_MASTER = { senaraiHarga: [], pelanggan: [], tempahan: [], karpet: [] };
 
@@ -280,23 +280,57 @@
             document.querySelectorAll('.menu-item')[indexMap[tabId]].classList.add('active');
         }
 
-        function fetchDataDariAPI() {
-            showLoading(true);
-            fetch(GAS_API_URL + "?action=readAll")
-                .then(res => res.json())
-                .then(response => {
-                    DATA_MASTER.senaraiHarga = response.senaraiHarga || [];
-                    DATA_MASTER.pelanggan = response.pelanggan || [];
-                    DATA_MASTER.tempahan = response.tempahan || [];
-                    DATA_MASTER.karpet = response.karpet || [];
-                    populateCustomerDropdown();
-                    renderDashboardMetrics();
-                    renderDashboardTable();
-                    executeGlobalSearch();
-                })
-                .catch(err => { console.error("Ralat API Get:", err); alert("Gagal memuat turun data dari Google Sheets."); })
-                .finally(() => showLoading(false));
-        }
+  
+
+function fetchDataDariAPI() {
+    showLoading(true);
+    
+    // Buat nama fungsi rawak untuk menyerap data callback
+    const functionName = 'jsonp_callback_' + Math.round(Math.random() * 1000000);
+    
+    // Aliran logik apabila data berjaya menembusi sekatan pelayan Google
+    window[functionName] = function(response) {
+        // Serap masuk semua baris data tab ke dalam memori sistem
+        DATA_MASTER.senaraiHarga = response.senaraiHarga || [];
+        DATA_MASTER.pelanggan = response.pelanggan || [];
+        DATA_MASTER.tempahan = response.tempahan || [];
+        DATA_MASTER.karpet = response.karpet || [];
+
+        // Kemas kini komponen UI pada skrin aplikasi web
+        populateCustomerDropdown();
+        renderDashboardMetrics();
+        renderDashboardTable();
+        
+        // Bersihkan borang perincian karpet dan muatkan dropdown produk
+        document.getElementById('carpetItemsContainer').innerHTML = "";
+        carpetRowCount = 0;
+        addCarpetRow(); 
+        
+        executeGlobalSearch();
+        
+        // Padam elemen skrip sementara untuk menjimatkan memori peranti
+        delete window[functionName];
+        document.getElementById(functionName).remove();
+        showLoading(false);
+    };
+
+    // MEMBINA STRUKTUR PENEMBUS BROWSER (JSONP INJECTION)
+    const scriptElement = document.createElement('script');
+    scriptElement.id = functionName;
+    
+    // Menyertipkan parameter &action=readAll bersama amaran &callback ke pelayan Google
+    scriptElement.src = GAS_API_URL + "?action=readAll&callback=" + functionName;
+    
+    // Jika sambungan gagal disebabkan masalah internet talian
+    scriptElement.onerror = function() {
+        console.error("Gagal menghubungi pelayan Google Apps Script.");
+        alert("Gagal memuat turun data. Sila semak sambungan internet atau URL API anda.");
+        showLoading(false);
+    };
+    
+    // Masukkan ke dalam dokumen untuk menghidupkan proses muat turun data
+    document.body.appendChild(scriptElement);
+}
 
         function toggleCustomerType() {
             const type = document.querySelector('input[name="custType"]:checked').value;
