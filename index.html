@@ -193,32 +193,16 @@
             });
         }
 
- function terimaDataPelanggan(data) {
-  dataPelangganGlobal = data;
-  const select = document.getElementById('select-pelanggan');
-  if(!select) return;
-  
-  select.innerHTML = '<option value="">-- Sila Pilih Pelanggan --</option>';
-  
-  data.forEach(p => {
-    // Membaca ID, dan menggunakan alamat/taman sebagai pengenalan pilihan
-    let paparanID = p.id || "Tiada ID";
-    let paparanKawasan = p.alamat || p.TELEFON || "Tiada Alamat"; 
-    
-    select.innerHTML += `<option value="${paparanID}">${paparanID} - ${paparanKawasan}</option>`;
-  });
-}
 
-function autoFillPelanggan() {
-  const id = document.getElementById('select-pelanggan').value;
-  const pelanggan = dataPelangganGlobal.find(p => p.id === id);
-  if(pelanggan) {
-    // Menyesuaikan isian borang mengikut data lajur Sheets anda yang terkini
-    document.getElementById('cust-nama').value = pelanggan.nama || "Pelanggan Sedia Ada";
-    document.getElementById('cust-tel').value = pelanggan.telefon || "";
-    document.getElementById('cust-alamat').value = pelanggan.alamat || "";
-  }
-}
+    function terimaDataPelanggan(data) {
+        dataPelangganGlobal = data;
+        const select = document.getElementById('select-pelanggan');
+        if(!select) return;
+        select.innerHTML = '<option value="">-- Sila Pilih Pelanggan --</option>';
+        data.forEach(p => {
+            select.innerHTML += `<option value="${p.id}">${p.id} - ${p.alamat}</option>`;
+        });
+    }
 
 
         function switchTab(tabId) {
@@ -246,7 +230,15 @@ function autoFillPelanggan() {
                 document.getElementById('box-p-sedia-ada').style.display = 'block';
             }
         }
-
+function autoFillPelanggan() {
+            const id = document.getElementById('select-pelanggan').value;
+            const pelanggan = dataPelangganGlobal.find(p => p.id === id);
+            if(pelanggan) {
+                document.getElementById('cust-nama').value = pelanggan.nama;
+                document.getElementById('cust-tel').value = pelanggan.telefon;
+                document.getElementById('cust-alamat').value = pelanggan.alamat;
+            }
+        }
    
 
         function tambahItemKeSenarai() {
