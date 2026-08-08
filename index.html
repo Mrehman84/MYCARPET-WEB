@@ -227,38 +227,59 @@
             </div>
         </section>
 
-        <!-- SCAN & TRACKING TAB -->
-        <section id="tracking" class="tab-content">
-            <header><div><h1>Scan & Tracking System</h1><p style="color: var(--text-muted);">Carian pintar dan kemas kini status pukal</p></div></header>
-            <div class="card">
-                <div class="form-group"><label>Kotak Carian Global</label><input type="text" id="searchBox" class="form-control" onkeyup="executeGlobalSearch()" placeholder="Cari mengikut QR ID, No Invois, Alamat, atau Jenis..."></div>
-                <div style="background: var(--bg-light); padding: 15px; border-radius: var(--radius); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
-                    <div><span style="font-weight: 600;" id="checkedCountLabel">0 item dipilih</span> untuk pertukaran status pukal.</div>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <select id="batchStatusOpt" class="form-control" style="width: 200px; padding: 8px 12px;">
-                            <option value="DALAM PROSES">DALAM PROSES</option>
-                            <option value="SEDANG DICUCI">SEDANG DICUCI</option>
-                            <option value="PENGERINGAN">PENGERINGAN</option>
-                            <option value="READY TO DELIVER">READY TO DELIVER</option>
-                            <option value="SELESAI">SELESAI</option>
-                        </select>
-                        <button class="btn btn-primary" style="padding: 8px 16px;" onclick="submitBatchUpdate()"><i class="fa-solid fa-save"></i> Kemas Kini Pukal</button>
-                    </div>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 14px;">
-                                <th style="padding: 12px; width: 40px;"><input type="checkbox" id="masterCheck" onclick="toggleSelectAllItems(this)"></th>
-                                <th style="padding: 12px;">QR ID / Invois</th><th style="padding: 12px;">Pelanggan / Alamat</th><th style="padding: 12px;">Jenis Karpet</th><th style="padding: 12px;">Harga Kos</th><th style="padding: 12px;">Status Semasa</th><th style="padding: 12px; text-align: center;">Tindakan</th>
-                            </tr>
-                        </thead>
-                        <tbody id="trackingTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-    </main>
+      <!-- SCAN & TRACKING TAB -->
+[section id="tracking" class="tab-content"]
+  [header]
+    [div]
+      [h1]Scan & Tracking System[/h1]
+      [p style="color: var(--text-muted);"]Carian pintar dan kemas kini status pukal[/p]
+    [/div]
+  [/header]
+  
+  [div class="card"]
+    [div class="form-group"]
+      [label]Kotak Carian Global[/label]
+      [div style="display: flex; gap: 10px;"]
+        [select id="searchType" class="form-control" style="width: 150px;" onchange="executeGlobalSearch()"]
+          [option value="inv"]No. Invois / QR[/option]
+          [option value="alamat"]Alamat Pelanggan[/option]
+        [/select]
+        [input type="text" id="searchBox" class="form-control" onkeyup="executeGlobalSearch()" placeholder="Mula menaip untuk mencari..."]
+      [/div]
+    [/div]
+    
+    [div style="background: var(--bg-light); padding: 15px; border-radius: var(--radius); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;"]
+      [div][span style="font-weight: 600;" id="checkedCountLabel"]0 item dipilih[/span] untuk pertukaran status pukal.[/div]
+      [div style="display: flex; gap: 10px; align-items: center;"]
+        [select id="batchStatusOpt" class="form-control" style="width: 200px; padding: 8px 12px;"]
+          [option value="DALAM PROSES"]DALAM PROSES[/option]
+          [option value="PENGERINGAN"]PENGERINGAN[/option]
+          [option value="READY TO DELIVER"]READY TO DELIVER[/option]
+          [option value="SELESAI DIHANTAR"]SELESAI DIHANTAR[/option]
+        [/select]
+        [button class="btn btn-primary" style="padding: 8px 16px;" onclick="submitBatchUpdate()"][i class="fa-solid fa-save"][/i] Kemas Kini Pukal[/button]
+      [/div]
+    [/div]
+    
+    [div style="overflow-x: auto;"]
+      [table style="width: 100%; border-collapse: collapse; text-align: left;"]
+        [thead]
+          [tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 14px;"]
+            [th style="padding: 12px; width: 40px;"][input type="checkbox" id="masterCheck" onclick="toggleSelectAllItems(this)"][/th]
+            [th style="padding: 12px;"]QR ID / Invois[/th]
+            [th style="padding: 12px;"]Pelanggan / Alamat[/th]
+            [th style="padding: 12px;"]Jenis Karpet[/th]
+            [th style="padding: 12px;"]Harga Kos[/th]
+            [th style="padding: 12px;"]Status Semasa[/th]
+            [th style="padding: 12px; text-align: center;"]Tindakan[/th]
+          [/tr]
+        [/thead]
+        [tbody id="trackingTableBody"][/tbody]
+      [/table]
+    [/div]
+  [/div]
+[/section]
+
     <script>
         // Sila gantikan URL di bawah dengan pautan Web App Google Apps Script anda yang sebenar
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxG1fDrDHW_IRIlUEO_cxK9pkeI9xgddeUVgNq6vAlmewwp9LmwU0p8lvhElhi_-EUW/exec";
