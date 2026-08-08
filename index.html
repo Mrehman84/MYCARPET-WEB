@@ -327,12 +327,79 @@ function fetchDataDariAPI() {
         carpetRowCount = 0;
         addCarpetRow(); 
         
-        executeGlobalSearch();
+        function executeGlobalSearch() {
+    try {
+        const kw = document.getElementById('searchBox') ? document.getElementById('searchBox').value.toLowerCase().trim() : '';
+        const searchType = document.getElementById('searchType') ? document.getElementById('searchType').value : 'inv';
+        const tbody = document.getElementById('trackingTableBody');
         
-        // Padam elemen skrip sementara untuk menjimatkan memori peranti
-        delete window[functionName];
-        document.getElementById(functionName).remove();
-        showLoading(false);
+        if (!tbody) return;
+        tbody.innerHTML = "";
+        
+        // Memastikan DATA_MASTER dan senarai karpet wujud sebelum penapisan dilakukan
+        if (!DATA_MASTER || !DATA_MASTER.karpet || !Array.isArray(DATA_MASTER.karpet)) {
+            tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center;">Menunggu memuatkan data master...</td></tr>';
+            return;
+        }
+        
+        // 1. Tapis karpet aktif SAHAJA (Sembunyikan status SELESAI dan SELESAI DIHANTAR)
+        let filtered = DATA_MASTER.karpet.filter(l => {
+            if (!l) return false;
+            
+            // Ambil status dan bersihkan ruang kosong
+            const st = l.STATUS ? l.STATUS.toString().trim().toUpperCase() : "";
+            
+            // Jika sudah selesai, terus singkirkan daripada senarai paparan tracking
+            if (st === "SELESAI" || st === "SELESAI DIHANTAR") return false;
+            
+            // Cari data tempahan dan pelanggan yang sepadan
+            const order = (DATA_MASTER.tempahan && Array.isArray(DATA_MASTER.tempahan)) ? DATA_MASTER.tempahan.find(o => o.INV_NO == l.INV_NO) : {};
+            const cust = (DATA_MASTER.pelanggan && Array.isArray(DATA_MASTER.pelanggan) && order) ? DATA_MASTER.pelanggan.find(c => c.CUSTOMER_ID == order.CUSTOMER_ID) : {};
+            
+            // Logik Dropdown Carian: mengikut jenis carian yang dipilih pengguna
+            if (searchType === 'inv') {
+                return (l.INV_NO || "").toString().toLowerCase().includes(kw) || (l.QR_ID || "").toString().toLowerCase().includes(kw);
+            } else if (searchType === 'alamat') {
+                return (cust.ALAMAT || "").toString().toLowerCase().includes(kw);
+            }
+            return false;
+        });
+
+        // Jika tiada karpet aktif dalam proses
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center; color: var(--text-muted);">Tiada hasil carian karpet yang aktif.</td></tr>';
+            return;
+        }
+
+        // 2. Paparkan data aktif yang berjaya ditapis ke dalam baris jadual
+        filtered.reverse().forEach(k => {
+            const order = DATA_MASTER.tempahan ? DATA_MASTER.tempahan.find(o => o.INV_NO == k.INV_NO) : {};
+            const cust = DATA_MASTER.pelanggan ? DATA_MASTER.pelanggan.find(c => c.CUSTOMER_ID == order.CUSTOMER_ID) : {};
+            
+            let tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid var(--border-color)';
+            tr.innerHTML = `
+                <td style="padding: 12px;"><input type="checkbox" class="row-checkbox" value="${k.QR_ID}" onclick="typeof updateCheckedCounter === 'function' && updateCheckedCounter()"></td>
+                <td style="padding: 12px;"><span style="font-weight:700; color:var(--primary-red);">${k.QR_ID}</span><br><small>Invois: ${k.INV_NO}</small></td>
+                <td style="padding: 12px;"><strong>${(cust.NAMA || "TIADA NAMA").toUpperCase()}</strong><br><small>${cust.ALAMAT || "-"}</small></td>
+                <td style="padding: 12px;">${k.JENIS || "-"}</td>
+                <td style="padding: 12px;">RM ${(parseFloat(k.HARGA) || 0).toFixed(2)}</td>
+                <td style="padding: 12px;"><span class="badge badge-proses">${k.STATUS || "DALAM PROSES"}</span></td>
+                <td style="padding: 12px; text-align:center;"><button class="btn btn-secondary" style="padding:6px 10px; font-size:12px;" onclick="tukarStatusSingleItem('${k.QR_ID}')"><i class="fa-solid fa-edit"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        if (typeof updateCheckedCounter === "function") updateCheckedCounter();
+    } catch (error) {
+        console.error("Ralat dalam executeGlobalSearch:", error);
+    } finally {
+        // Pelindung Utama: Memaksa loading screen ditutup jika skrip selesai diproses
+        const loader = document.getElementById('loadingOverlay');
+        if (loader) loader.style.display = 'none';
+    }
+}
+
     };
 
     // MEMBINA STRUKTUR PENEMBUS BROWSER (JSONP INJECTION)
