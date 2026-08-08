@@ -417,20 +417,19 @@ bersihkanSelesaiDihantar();
             tbody.appendChild(tr);
         });
         
-        if (typeof updateCheckedCounter === "function") updateCheckedCounter();
-        
-    } catch (error) {
-        console.error("Ralat dalam executeGlobalSearch:", error);
-    } finally {
-        // Talian Pengaman: Memaksa loading screen ditutup walau apa pun yang terjadi
-        const loader = document.getElementById('loadingOverlay');
-        if (loader) loader.style.display = 'none';
-    }
+      // ======= PADAMKAN BARIS INI (Baris 419 - 433) =======
+if ( typeof updateCheckedCounter === "function") updateCheckedCounter();
+} catch ( error) {
+console. error("Ralat dalam executeGlobalSearch:", error);
+} finally {
+// Pelindung Utama: Memaksa loading screen ditutup jika skrip selesai diproses
+const loader = document. getElementById('loadingOverlay');
+if ( loader) loader. style. display = 'none';
 }
+}
+};
+// ====================================================
 
-        if (typeof updateCheckedCounter === "function") updateCheckedCounter();
-    } catch (error) {
-        console.error("Ralat dalam executeGlobalSearch:", error);
     } finally {
         // Pelindung Utama: Memaksa loading screen ditutup jika skrip selesai diproses
         const loader = document.getElementById('loadingOverlay');
