@@ -3,397 +3,1382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MYCARPETPRO System</title>
-    <!-- Bootstrap & Font Awesome -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- PDF & QR Libraries -->
+    <title>MYCARPET PRO v2.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
-    
+
     <style>
-        body { background-color: #f4f7fc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .sidebar { min-height: 100vh; background-color: #212529; color: white; padding: 20px; width: 250px; position: fixed; }
-        .content { margin-left: 250px; padding: 30px; }
-        .nav-link { color: #adb5bd; cursor: pointer; }
-        .nav-link:hover, .nav-link.active { color: #fff; background-color: #dc3545; border-radius: 5px; }
-        .section-container { display: none; }
-        .section-container.active { display: block; }
-        
-        /* Stiker QR 40x30mm */
-        .qr-sticker { width: 40mm; height: 30mm; border: 1px dashed #000; padding: 2mm; text-align: center; box-sizing: border-box; display: inline-block; margin: 2px; page-break-after: always; }
-        .qr-sticker .header { font-size: 6px; font-weight: bold; }
-        .qr-sticker .inv { font-size: 7px; font-weight: bold; }
-        .qr-sticker canvas { width: 100%; height: 11mm; }
-        .qr-sticker .id-text { font-size: 5.5px; font-weight: bold; font-family: monospace; }
-        .qr-sticker .footer { font-size: 5px; border-top: 0.5px solid #000; padding-top: 1px; font-weight: bold; }
+        /* ===== VARIABEL & RESET ===== */
+        :root {
+            --primary-red: #ff4b4b;
+            --primary-dark: #1e1e2f;
+            --sidebar-width: 270px;
+            --bg-light: #f8f9fa;
+            --text-dark: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --info: #3498db;
+            --radius: 10px;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,.10), 0 2px 4px -1px rgba(0,0,0,.06);
+            --orange: #ff6d00;
+            --green: #28a745;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-light); color: var(--text-dark); display: flex; min-height: 100vh; overflow-x: hidden; }
+        #loadingOverlay {
+            position: fixed; inset: 0; background: rgba(255,255,255,.92); z-index: 9999;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        #loadingOverlay.active { display: flex; }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid var(--border-color);
+            border-top-color: var(--primary-red); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        @media print { .no-print { display: none !important; } .qr-sticker { border: none !important; page-break-after: always; } @page { size: 40mm 30mm; margin: 0; } }
+        /* ===== SIDEBAR ===== */
+        aside {
+            width: var(--sidebar-width); background: var(--primary-dark); color: #fff;
+            position: fixed; top: 0; bottom: 0; left: 0;
+            display: flex; flex-direction: column; z-index: 100;
+            transition: transform .3s ease; overflow-y: auto;
+        }
+        .sidebar-brand {
+            padding: 24px 20px; font-size: 20px; font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            display: flex; align-items: center; gap: 10px;
+            color: var(--primary-red);
+        }
+        .sidebar-brand span { color: #fff; }
+        .sidebar-brand .brand-red { color: var(--primary-red); }
+        .sidebar-menu {
+            list-style: none; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px;
+            flex: 1;
+        }
+        .menu-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; color: #a0aec0; text-decoration: none;
+            border-radius: var(--radius); font-weight: 500; cursor: pointer;
+            transition: .2s; font-size: 14px;
+        }
+        .menu-item i { width: 22px; font-size: 16px; text-align: center; }
+        .menu-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+        .menu-item.active { background: var(--primary-red); color: #fff; }
 
-        /* PDF Invois Preview Style (To match design) */
-        .invoice-box { background: white; padding: 30px; border: 1px solid #ddd; max-width: 800px; margin: 0 auto; }
-        .inv-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .inv-title { color: #ff6d00; font-size: 32px; font-weight: bold; }
-        .inv-info-box { border: 1px solid #000; padding: 5px; }
-        .inv-banner { background: #ff6d00; color: white; padding: 5px 10px; font-weight: bold; margin-top: 10px; }
-        .inv-status-badge { border: 1px solid #ff6d00; background: #fff0ed; color: #ff6d00; font-weight: bold; text-align: center; padding: 5px; float: right; }
-        .inv-status-paid { border: 1px solid #28a745; background: #e6f5ea; color: #28a745; }
-        .inv-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .inv-table th { background: #ff6d00; color: white; padding: 5px; border: 1px solid #ff6d00; font-size: 12px; }
-        .inv-table td { border: 1px solid #000; padding: 5px; font-size: 12px; }
-        .inv-summary { float: right; margin-top: 10px; border-collapse: collapse; }
-        .inv-summary td { border: 1px solid #000; padding: 3px 10px; font-size: 12px; }
-        .inv-footer-msg { color: #28a745; font-style: italic; font-weight: bold; margin-top: 20px; text-align: center; }
+        /* ===== MAIN ===== */
+        main {
+            margin-left: var(--sidebar-width); flex: 1; padding: 30px;
+            width: calc(100% - var(--sidebar-width)); transition: .3s;
+        }
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 20px; margin-bottom: 28px; flex-wrap: wrap;
+        }
+        header h1 { font-size: 26px; font-weight: 700; }
+        header p { color: var(--text-muted); font-size: 14px; }
+
+        /* ===== TAB ===== */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: #fff; border-radius: var(--radius); padding: 24px;
+            box-shadow: var(--shadow); margin-bottom: 24px; border: 1px solid var(--border-color);
+        }
+        .card-title {
+            font-size: 18px; font-weight: 600; margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
+        }
+
+        /* ===== FORM ===== */
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+        .form-control {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border-color);
+            border-radius: var(--radius); font-size: 14px; outline: none;
+            background: #fff; transition: border-color .2s;
+        }
+        .form-control:focus { border-color: var(--primary-red); }
+        textarea.form-control { resize: vertical; min-height: 80px; }
+        .row { display: flex; gap: 20px; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 200px; }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 10px 20px; border: none; border-radius: var(--radius);
+            font-weight: 600; cursor: pointer; display: inline-flex;
+            align-items: center; justify-content: center; gap: 8px;
+            font-size: 14px; transition: .2s; text-decoration: none;
+        }
+        .btn:hover { opacity: .85; transform: translateY(-1px); }
+        .btn-primary { background: var(--primary-red); color: #fff; }
+        .btn-secondary { background: #e2e8f0; color: var(--text-dark); }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-danger { background: #e53e3e; color: #fff; }
+        .btn-info { background: var(--info); color: #fff; }
+        .btn-warning { background: var(--warning); color: #333; }
+        .btn-whatsapp { background: #25D366; color: #fff; }
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+        /* ===== BADGES ===== */
+        .badge {
+            padding: 4px 12px; border-radius: 20px; font-size: 11px;
+            font-weight: 600; text-transform: uppercase; display: inline-block;
+        }
+        .badge-proses { background: #ffeeb2; color: #8a6500; }
+        .badge-cuci { background: #ebf8ff; color: #2b6cb0; }
+        .badge-ready { background: #e6fffa; color: #234e52; }
+        .badge-selesai { background: #c6f6d5; color: #22543d; }
+        .badge-pending { background: #ffe0b2; color: #bf6000; }
+        .badge-paid { background: #c8e6c9; color: #1b5e20; }
+
+        /* ===== TABLES ===== */
+        .table-wrap { overflow-x: auto; }
+        .data-table {
+            width: 100%; border-collapse: collapse; font-size: 14px; min-width: 600px;
+        }
+        .data-table th {
+            padding: 10px 12px; border-bottom: 2px solid var(--border-color);
+            color: var(--text-muted); text-align: left; font-weight: 600;
+        }
+        .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .data-table tr:hover { background: #f7fafc; }
+
+        /* ===== METRICS ===== */
+        .metrics-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+            gap: 18px; margin-bottom: 30px;
+        }
+        .metric-card {
+            background: #fff; padding: 20px; border-radius: var(--radius);
+            box-shadow: var(--shadow); border-left: 5px solid var(--primary-red);
+        }
+        .metric-card h3 { font-size: 13px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+        .metric-card p { font-size: 28px; font-weight: 700; }
+
+        /* ===== INVOICE PREVIEW ===== */
+        .invoice-preview {
+            background: #fff; border: 1px solid #dfe5ec; border-radius: 10px;
+            padding: 28px; margin-top: 16px;
+        }
+        .invoice-head {
+            display: flex; justify-content: space-between; gap: 20px;
+            border-bottom: 2px solid #222; padding-bottom: 16px; margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .invoice-title { font-size: 24px; font-weight: 700; }
+        .invoice-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .invoice-table th, .invoice-table td {
+            padding: 8px 10px; border-bottom: 1px solid #ddd; text-align: left;
+        }
+        .invoice-table th:last-child, .invoice-table td:last-child { text-align: right; }
+        .invoice-total {
+            margin-left: auto; width: 320px; max-width: 100%; margin-top: 16px;
+        }
+        .invoice-total div { display: flex; justify-content: space-between; padding: 6px 0; }
+        .invoice-total .grand {
+            font-size: 20px; font-weight: 700; border-top: 2px solid #222;
+            margin-top: 6px; padding-top: 10px;
+        }
+        .status-badge {
+            padding: 4px 16px; border-radius: 20px; font-weight: 700; font-size: 14px;
+            display: inline-block;
+        }
+        .status-pending { background: #fff3e0; color: #bf6000; border: 1px solid #ffb74d; }
+        .status-paid { background: #e8f5e9; color: #1b5e20; border: 1px solid #81c784; }
+
+        /* ===== QR / BARCODE ===== */
+        .qr-container {
+            display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start;
+            margin-top: 16px;
+        }
+        .qr-item {
+            background: #fff; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 8px; text-align: center; width: 180px;
+        }
+        .qr-item canvas, .qr-item img { display: block; margin: 0 auto 6px; }
+        .qr-item .qr-label { font-weight: 600; font-size: 12px; margin-top: 2px; word-break: break-all; }
+        .qr-item small { font-size: 10px; color: var(--text-muted); display: block; margin-top: 2px; }
+
+        /* ===== WHATSAPP PREVIEW ===== */
+        .wa-preview {
+            background: #dcf8c6; padding: 16px; border-radius: var(--radius);
+            white-space: pre-wrap; font-family: 'Segoe UI', sans-serif;
+            font-size: 14px; line-height: 1.6; margin-top: 12px;
+            border: 1px solid #b7d7a8;
+        }
+
+        /* ===== MISC ===== */
+        .mobile-menu { display: none; }
+        .muted { color: var(--text-muted); }
+        .text-center { text-align: center; }
+        .mt-16 { margin-top: 16px; }
+        .mb-16 { margin-bottom: 16px; }
+        .flex { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .hidden { display: none !important; }
+        .w-full { width: 100%; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            aside { transform: translateX(-100%); }
+            body.sidebar-open aside { transform: translateX(0); }
+            main { margin-left: 0; width: 100%; padding: 16px; }
+            .mobile-menu { display: inline-flex; }
+            .row { flex-direction: column; }
+            .col { min-width: 0; }
+            .metrics-grid { grid-template-columns: repeat(2,1fr); }
+        }
+        @media (max-width: 600px) {
+            .metrics-grid { grid-template-columns: 1fr; }
+            .invoice-head { flex-direction: column; }
+            .invoice-total { width: 100%; }
+            .btn { width: 100%; justify-content: center; }
+            header h1 { font-size: 20px; }
+        }
+
+        /* ===== CETAKAN BARCODE: 40mm x 30mm ===== */
+        @media print {
+            /* Sembunyi semua kecuali barcode */
+            body * { visibility: hidden; }
+            #barcodePrintArea, #barcodePrintArea * { visibility: visible; }
+            #barcodePrintArea {
+                position: absolute; left: 0; top: 0; width: 100%;
+                margin: 0; padding: 0;
+            }
+            @page { size: 40mm 30mm; margin: 2mm; }
+            .qr-item {
+                border: none !important; padding: 2px !important;
+                width: auto !important; display: inline-block !important;
+                page-break-inside: avoid;
+            }
+            .qr-item canvas { width: 28mm !important; height: 28mm !important; }
+            .qr-item .qr-label { font-size: 8px !important; }
+            .qr-item small { display: none !important; }
+            .no-print { display: none !important; }
+        }
+
+        /* ===== KHAS UNTUK CETAKAN BARCODE ===== */
+        #barcodePrintArea { display: none; }
+        #barcodePrintArea.active { display: block; }
+        .barcode-print-grid {
+            display: flex; flex-wrap: wrap; gap: 4px;
+            justify-content: flex-start; padding: 2mm;
+        }
+        .barcode-print-item {
+            width: 36mm; height: 26mm; border: 1px solid #ccc;
+            border-radius: 2px; padding: 2mm; text-align: center;
+            background: #fff; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; page-break-inside: avoid;
+        }
+        .barcode-print-item canvas { width: 22mm !important; height: 22mm !important; }
+        .barcode-print-item .label {
+            font-size: 6pt; font-weight: 600; margin-top: 1mm;
+            word-break: break-all; line-height: 1.2;
+        }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <h4 class="mb-4"><i class="fas fa-cube me-2"></i>MYCARPETPRO</h4>
-        <ul class="nav flex-column">
-            <li class="nav-item"><a class="nav-link active" onclick="switchTab('tab-tempahan')"><i class="fas fa-plus-circle me-2"></i>Tempahan Baru</a></li>
-            <li class="nav-item"><a class="nav-link" onclick="switchTab('tab-katalog')"><i class="fas fa-list me-2"></i>Katalog Harga</a></li>
-            <li class="nav-item"><a class="nav-link" onclick="switchTab('tab-invois')"><i class="fas fa-file-invoice me-2"></i>Invois</a></li>
-            <li class="nav-item"><a class="nav-link" onclick="switchTab('tab-barcode')"><i class="fas fa-qrcode me-2"></i>Barcode / QR</a></li>
-        </ul>
+<!-- ===== LOADING ===== -->
+<div id="loadingOverlay">
+    <div class="spinner"></div>
+    <p style="margin-top:15px;font-weight:500;color:var(--text-muted)">Memuat data...</p>
+</div>
+
+<!-- ===== SIDEBAR ===== -->
+<aside>
+    <div class="sidebar-brand">
+        <i class="fa-solid fa-rug"></i>
+        <span>MYCARPET<span class="brand-red">PRO</span></span>
     </div>
+    <ul class="sidebar-menu">
+        <li class="menu-item active" data-tab="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</li>
+        <li class="menu-item" data-tab="temujanji"><i class="fa-regular fa-calendar-check"></i> Temujanji</li>
+        <li class="menu-item" data-tab="tempahan"><i class="fa-solid fa-file-invoice-dollar"></i> Tempahan Baru</li>
+        <li class="menu-item" data-tab="tracking"><i class="fa-solid fa-qrcode"></i> Tracking QR</li>
+        <li class="menu-item" data-tab="payment"><i class="fa-solid fa-money-bill-wave"></i> Pembayaran</li>
+        <li class="menu-item" data-tab="invoice"><i class="fa-solid fa-print"></i> Invois & Resit</li>
+        <li class="menu-item" data-tab="harga"><i class="fa-solid fa-tags"></i> Katalog Harga</li>
+        <li class="menu-item" data-tab="barcode"><i class="fa-solid fa-barcode"></i> Cetak Barcode</li>
+        <li class="menu-item" data-tab="kewangan"><i class="fa-solid fa-coins"></i> Kewangan</li>
+    </ul>
+</aside>
 
-    <!-- MAIN CONTENT -->
-    <div class="content">
-        <div id="loading-spinner" class="text-center p-5"><div class="spinner-border text-danger"></div><p>Memuatkan Data...</p></div>
+<!-- ===== MAIN ===== -->
+<main>
 
-        <!-- 1. TEMPAHAN BARU -->
-        <div id="tab-tempahan" class="section-container active">
-            <h3>📝 Tempahan Baru</h3>
-            <div class="card p-4 shadow-sm">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label>Pelanggan (ID / Nama)</label>
-                        <select id="cust-select" class="form-select"></select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label>Pilih Jenis Karpet (Harga Auto-Kira)</label>
-                        <select id="carpet-select" class="form-select">
-                            <option value="">-- Pilih Karpet --</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label>Kuantiti</label>
-                        <input type="number" id="qty-input" class="form-control" value="1" min="1">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label>Harga Seunit (RM)</label>
-                        <input type="text" id="price-display" class="form-control" readonly placeholder="Akan dikira automatik">
-                    </div>
-                </div>
-                <button class="btn btn-danger w-100" onclick="submitTempahan()"><i class="fas fa-save me-2"></i>Simpan Tempahan</button>
+    <!-- ========================== 1. DASHBOARD ========================== -->
+    <section id="dashboard" class="tab-content active">
+        <header>
+            <div><h1>Dashboard Operasi</h1><p class="muted">Status pembersihan karpet masa nyata</p></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn btn-secondary mobile-menu" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                <button class="btn btn-secondary" onclick="fetchData()"><i class="fa-solid fa-sync"></i> Refresh</button>
             </div>
+        </header>
+        <div class="metrics-grid">
+            <div class="metric-card" style="border-left-color:#f1c40f"><h3>Dalam Proses</h3><p id="countProses">0</p></div>
+            <div class="metric-card" style="border-left-color:#3498db"><h3>Pengeringan</h3><p id="countCuci">0</p></div>
+            <div class="metric-card" style="border-left-color:#38b2ac"><h3>Ready Deliver</h3><p id="countReady">0</p></div>
+            <div class="metric-card" style="border-left-color:#2ecc71"><h3>Selesai</h3><p id="countSelesai">0</p></div>
         </div>
-
-        <!-- 2. KATALOG HARGA -->
-        <div id="tab-katalog" class="section-container">
-            <h3>📋 Katalog Harga</h3>
-            <div class="card p-4 shadow-sm">
-                <table class="table table-bordered table-hover" id="katalog-table">
-                    <thead class="table-dark"><tr><th>KOD</th><th>JENIS CARPET</th><th>LEBAR</th><th>PANJANG</th><th>HARGA SQFT</th><th>HARGA DARAB</th></tr></thead>
-                    <tbody id="katalog-body"></tbody>
+        <div class="card">
+            <h3 class="card-title">Senarai Aktiviti Terkini</h3>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>QR ID</th><th>Invois</th><th>Jenis</th><th>Harga</th><th>Tarikh</th><th>Status</th></tr></thead>
+                    <tbody id="dashboardTableBody"><tr><td colspan="6" class="text-center muted">Tiada data</td></tr></tbody>
                 </table>
-                <div class="alert alert-info mt-3"><i class="fas fa-calculator me-2"></i>Formula: (Lebar x Panjang) x Harga Darab = Harga Jualan.</div>
             </div>
         </div>
+    </section>
 
-        <!-- 3. INVOIS -->
-        <div id="tab-invois" class="section-container">
-            <h3>🧾 Cetak Invois</h3>
-            <div class="card p-4 shadow-sm">
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label>Pilih Invois (No - Pelanggan - Alamat)</label>
-                        <select id="invoice-select" class="form-select">
-                            <option value="">-- Sila Pilih Invois --</option>
-                        </select>
-                    </div>
+    <!-- ========================== 2. TEMUJANJI ========================== -->
+    <section id="temujanji" class="tab-content">
+        <header><div><h1>Temujanji Ambil Karpet</h1><p class="muted">Jana mesej WhatsApp untuk pengambilan</p></div></header>
+        <div class="card">
+            <div class="row">
+                <div class="col form-group">
+                    <label>Nama Pelanggan</label>
+                    <input type="text" id="tjNama" class="form-control" placeholder="Nama pelanggan">
                 </div>
-                <div id="invoice-preview-area" class="mt-3"></div>
-                <button class="btn btn-success w-100 no-print mt-3" onclick="generatePDF()"><i class="fas fa-file-pdf me-2"></i>Jana & Muat Turun PDF</button>
-            </div>
-        </div>
-
-        <!-- 4. BARCODE / QR -->
-        <div id="tab-barcode" class="section-container">
-            <h3>🖨️ Cetak Barcode</h3>
-            <div class="card p-4 shadow-sm">
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label>Pilih Invois (No - Pelanggan - Alamat)</label>
-                        <select id="barcode-select" class="form-select">
-                            <option value="">-- Sila Pilih Invois --</option>
-                        </select>
-                    </div>
+                <div class="col form-group">
+                    <label>No. Telefon (WhatsApp)</label>
+                    <input type="text" id="tjTelefon" class="form-control" placeholder="60123456789">
                 </div>
-                <div id="barcode-preview-area" class="mt-3 text-center"></div>
-                <button class="btn btn-primary w-100 no-print mt-3" onclick="printBarcodes()"><i class="fas fa-print me-2"></i>Cetak Stiker QR (40x30mm)</button>
+            </div>
+            <div class="form-group">
+                <label>Alamat Pengambilan</label>
+                <textarea id="tjAlamat" class="form-control" rows="2" placeholder="No, Jalan, Taman..."></textarea>
+            </div>
+            <div class="row">
+                <div class="col form-group">
+                    <label>Tarikh Ambil</label>
+                    <input type="date" id="tjTarikh" class="form-control">
+                </div>
+                <div class="col form-group">
+                    <label>Masa Ambil</label>
+                    <input type="time" id="tjMasa" class="form-control">
+                </div>
+            </div>
+            <div class="flex">
+                <button class="btn btn-primary" onclick="janaMesejJanji()"><i class="fa-regular fa-copy"></i> Salin Mesej</button>
+                <button class="btn btn-whatsapp" onclick="hantarWhatsAppJanji()"><i class="fa-brands fa-whatsapp"></i> Hantar ke WhatsApp</button>
+            </div>
+            <div id="mesejPreview" class="wa-preview hidden"></div>
+        </div>
+    </section>
+
+    <!-- ========================== 3. TEMPAHAN BARU ========================== -->
+    <section id="tempahan" class="tab-content">
+        <header><div><h1>Tempahan Baru</h1><p class="muted">Daftar kemasukan karpet pelanggan</p></div></header>
+
+        <div class="card">
+            <h3 class="card-title">1. Maklumat Pelanggan</h3>
+            <div class="form-group">
+                <label>Jenis Pelanggan</label>
+                <div style="display:flex;gap:20px;flex-wrap:wrap">
+                    <label><input type="radio" name="custType" value="lama" checked onchange="toggleCustType()"> Pelanggan Sedia Ada</label>
+                    <label><input type="radio" name="custType" value="baru" onchange="toggleCustType()"> Pelanggan Baru</label>
+                </div>
+            </div>
+            <div id="secCustLama" class="form-group">
+                <label>Pilih Pelanggan</label>
+                <select id="optPelanggan" class="form-control" onchange="loadCustomerDetails()"><option value="">-- Pilih --</option></select>
+            </div>
+            <div id="secCustBaru" style="display:none">
+                <div class="row">
+                    <div class="col form-group"><label>Nama Penuh</label><input id="custNama" class="form-control" placeholder="Ahmad"></div>
+                    <div class="col form-group"><label>No. Telefon</label><input id="custTel" class="form-control" placeholder="60123456789"></div>
+                </div>
+                <div class="row">
+                    <div class="col form-group"><label>Alamat</label><input id="custAlamat" class="form-control" placeholder="No, Jalan..."></div>
+                    <div class="col form-group"><label>Daerah</label><input id="custDaerah" class="form-control" placeholder="Kulim"></div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // KONFIGURASI
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyDZGqIqcloW_acpOe7MOYRHvG4neZK0oRiUP5-Cqq8K1oR2-RYOw-Icp6bBRL5yzX3/exec";
-        let globalData = { senaraiHarga: [], pelanggan: [], tempahan: [], karpet: [], payment: [] };
+        <div class="card">
+            <h3 class="card-title">2. Perincian Item Karpet</h3>
+            <div class="info-box" style="background:#edf6ff;padding:12px;border-radius:8px;margin-bottom:16px;">
+                Pilih <strong>KOD</strong> – sistem akan ambil jenis, dimensi & harga dari <strong>SENARAI_HARGA</strong>.
+            </div>
+            <div id="carpetItemsContainer"></div>
+            <button class="btn btn-secondary mt-16" onclick="addCarpetRow()"><i class="fa-solid fa-plus"></i> Tambah Helai</button>
+            <div class="flex-between mt-16" style="border-top:2px dashed var(--border-color);padding-top:16px;">
+                <span style="font-size:18px;font-weight:600;">Jumlah: <span style="color:var(--primary-red);font-size:24px;" id="grandTotalLabel">RM 0.00</span></span>
+                <button class="btn btn-success" onclick="simpanTempahan()"><i class="fa-solid fa-cloud-upload-alt"></i> Proses & Simpan</button>
+            </div>
+            <div id="tempahanPreview" class="wa-preview hidden mt-16"></div>
+            <div id="tempahanWhatsAppBtn" class="hidden mt-16">
+                <button class="btn btn-whatsapp" onclick="hantarWhatsAppTempahan()"><i class="fa-brands fa-whatsapp"></i> Hantar ke WhatsApp</button>
+            </div>
+        </div>
+    </section>
 
-        // 1. LOAD DATA DARI GAS
-        async function loadData() {
-            try {
-                const response = await fetch(GAS_URL + "?action=readAll");
-                globalData = await response.json();
-                document.getElementById("loading-spinner").style.display = "none";
-                populateDropdowns();
-                renderKatalog();
-            } catch (error) {
-                document.getElementById("loading-spinner").innerHTML = `<div class="alert alert-danger">Ralat: ${error.message}</div>`;
+    <!-- ========================== 4. TRACKING QR ========================== -->
+    <section id="tracking" class="tab-content">
+        <header><div><h1>Scan & Tracking QR</h1><p class="muted">Hanya karpet aktif dipaparkan</p></div></header>
+        <div class="card">
+            <div class="form-group">
+                <label>Cari No. Invois / Alamat</label>
+                <select id="trackingInvoiceSelect" class="form-control"><option value="">-- Semua --</option></select>
+            </div>
+            <div class="row">
+                <div class="col form-group">
+                    <label>Cari QR ID</label>
+                    <input type="text" id="searchBox" class="form-control" placeholder="INV1001-2">
+                </div>
+                <div class="col form-group">
+                    <label>Status Baharu (Pukal)</label>
+                    <select id="batchStatusOpt" class="form-control">
+                        <option value="DALAM PROSES">DALAM PROSES</option>
+                        <option value="PENGERINGAN">PENGERINGAN</option>
+                        <option value="READY TO DELIVER">READY TO DELIVER</option>
+                        <option value="SELESAI DIHANTAR">SELESAI DIHANTAR</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex-between" style="background:var(--bg-light);padding:12px;border-radius:8px;margin-bottom:16px;">
+                <div><strong id="checkedCountLabel">0 item dipilih</strong></div>
+                <button class="btn btn-primary btn-sm" onclick="submitBatchUpdate()"><i class="fa-solid fa-save"></i> Kemas Kini Pukal</button>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th><input type="checkbox" id="masterCheck" onchange="toggleSelectAll(this)"></th><th>QR / Invois</th><th>Pelanggan / Alamat</th><th>Jenis</th><th>Harga</th><th>Status</th><th>Tindakan</th></tr></thead>
+                    <tbody id="trackingTableBody"><tr><td colspan="7" class="text-center muted">Tiada data</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================== 5. PEMBAYARAN ========================== -->
+    <section id="payment" class="tab-content">
+        <header><div><h1>Pengurusan Pembayaran</h1><p class="muted">Rekod bayaran dan deposit pelanggan</p></div></header>
+        <div class="card">
+            <div class="form-group">
+                <label>Pilih Invois (No - Pelanggan - Alamat)</label>
+                <select id="paymentInvoiceSelect" class="form-control" onchange="loadPaymentData()"><option value="">-- Pilih --</option></select>
+            </div>
+            <div id="paymentInfo" style="display:none;">
+                <div class="row">
+                    <div class="col form-group"><label>Jumlah Keseluruhan (RM)</label><input id="payTotal" class="form-control" disabled></div>
+                    <div class="col form-group"><label>Deposit Telah Dibayar (RM)</label><input id="payDeposit" class="form-control" disabled></div>
+                    <div class="col form-group"><label>Baki (RM)</label><input id="payBalance" class="form-control" disabled style="font-weight:700;color:var(--primary-red);"></div>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Bayaran Baru (RM)</label>
+                    <input type="number" id="payAmount" class="form-control" min="0" step="0.01" placeholder="0.00">
+                </div>
+                <button class="btn btn-success" onclick="rekodBayaran()"><i class="fa-solid fa-check"></i> Rekod Bayaran</button>
+                <div id="paymentHistory" class="mt-16"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================== 6. INVOIS & RESIT ========================== -->
+    <section id="invoice" class="tab-content">
+        <header><div><h1>🖨️ Invois & Resit</h1><p class="muted">Pilih invois aktif untuk paparan</p></div></header>
+        <div class="card no-print">
+            <div class="form-group">
+                <label>Pilih Invois (No - Pelanggan - Alamat)</label>
+                <select id="invoiceSelect" class="form-control" onchange="renderInvoice()"><option value="">-- Pilih --</option></select>
+            </div>
+            <div class="row">
+                <div class="col form-group"><label>Servis Tambahan</label><input type="text" id="extraServiceName" class="form-control" placeholder="Caj Urgen" oninput="renderInvoice()"></div>
+                <div class="col form-group"><label>Harga (RM)</label><input type="number" id="extraServicePrice" class="form-control" min="0" step="0.01" value="0" oninput="renderInvoice()"></div>
+            </div>
+            <div class="flex">
+                <button class="btn btn-primary" onclick="renderInvoice()"><i class="fa-solid fa-eye"></i> Papar</button>
+                <button class="btn btn-secondary" onclick="downloadInvoicePDF()"><i class="fa-solid fa-file-pdf"></i> Muat Turun PDF</button>
+                <button class="btn btn-success" onclick="copyInvoiceWhatsApp()"><i class="fa-regular fa-copy"></i> Salin WhatsApp</button>
+                <button class="btn btn-whatsapp" onclick="hantarWhatsAppInvoice()"><i class="fa-brands fa-whatsapp"></i> Hantar ke WhatsApp</button>
+            </div>
+        </div>
+        <div id="invoicePreviewContainer"></div>
+    </section>
+
+    <!-- ========================== 7. KATALOG HARGA ========================== -->
+    <section id="harga" class="tab-content">
+        <header><div><h1>Katalog Harga</h1><p class="muted">Kemas kini harga per sqft mengikut kod karpet</p></div></header>
+        <div class="card">
+            <h3 class="card-title">Kemas Kini Harga Pukal</h3>
+            <div class="row">
+                <div class="col form-group">
+                    <label>Pilih Kod Karpet</label>
+                    <select id="hargaKodSelect" class="form-control">
+                        <option value="CK">CK</option>
+                        <option value="CN">CN</option>
+                        <option value="CS">CS</option>
+                        <option value="CSG">CSG</option>
+                    </select>
+                </div>
+                <div class="col form-group">
+                    <label>Harga per SQFT (RM)</label>
+                    <input type="number" id="hargaSqftInput" class="form-control" min="0" step="0.01" placeholder="1.20">
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="kemaskiniHargaPukal()"><i class="fa-solid fa-save"></i> Kemas Kini Semua Kod</button>
+            <div id="hargaUpdateStatus" class="mt-16"></div>
+        </div>
+        <div class="card">
+            <h3 class="card-title">Senarai Harga Semasa</h3>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Kod</th><th>Jenis Carpet</th><th>Lebar (kaki)</th><th>Panjang (kaki)</th><th>Luas (kaki²)</th><th>Harga per SQFT (RM)</th><th>Harga (RM)</th></tr></thead>
+                    <tbody id="hargaTableBody"><tr><td colspan="7" class="text-center muted">Tiada data</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================== 8. CETAK BARCODE ========================== -->
+    <section id="barcode" class="tab-content">
+        <header><div><h1>🏷️ Cetak Barcode</h1><p class="muted">Jana QR code saiz 40mm x 30mm untuk thermal printer</p></div></header>
+        <div class="card">
+            <div class="form-group">
+                <label>Pilih Invois (No - Pelanggan - Alamat)</label>
+                <select id="barcodeInvoiceSelect" class="form-control" onchange="generateBarcodes()"><option value="">-- Pilih --</option></select>
+            </div>
+            <div id="barcodeContainer" class="qr-container"></div>
+            <div class="flex mt-16">
+                <button class="btn btn-primary" onclick="previewBarcodePrint()"><i class="fa-solid fa-eye"></i> Preview Cetakan</button>
+                <button class="btn btn-secondary" onclick="printBarcodes()"><i class="fa-solid fa-print"></i> Cetak / Simpan PDF (40x30mm)</button>
+            </div>
+        </div>
+        <div id="barcodePrintArea" class="card"></div>
+    </section>
+
+    <!-- ========================== 9. KEWANGAN ========================== -->
+    <section id="kewangan" class="tab-content">
+        <header><div><h1>📈 Kewangan</h1><p class="muted">Lejar perbelanjaan dan pendapatan</p></div></header>
+        <div class="card">
+            <h3 class="card-title">Tambah Perbelanjaan</h3>
+            <div class="row">
+                <div class="col form-group"><label>Penerangan</label><input id="expDesc" class="form-control" placeholder="Beli bahan cucian"></div>
+                <div class="col form-group"><label>Jumlah (RM)</label><input type="number" id="expAmount" class="form-control" min="0" step="0.01"></div>
+            </div>
+            <div class="form-group"><label>Tarikh</label><input type="date" id="expDate" class="form-control"></div>
+            <button class="btn btn-danger" onclick="tambahPerbelanjaan()"><i class="fa-solid fa-plus"></i> Tambah Perbelanjaan</button>
+        </div>
+        <div class="card">
+            <h3 class="card-title">Lejar Transaksi</h3>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Tarikh</th><th>Penerangan</th><th>Jenis</th><th>Jumlah (RM)</th></tr></thead>
+                    <tbody id="lejarBody"><tr><td colspan="4" class="text-center muted">Tiada rekod</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ============================================================ -->
+<!-- JAVASCRIPT (LOGIK PENUH)                                      -->
+<!-- ============================================================ -->
+<script>
+// ============================================================
+// KONFIGURASI & STATE
+// ============================================================
+const CONFIG = {
+    GAS_API_URL: "https://script.google.com/macros/s/AKfycbyDZGqIqcloW_acpOe7MOYRHvG4neZK0oRiUP5-Cqq8K1oR2-RYOw-Icp6bBRL5yzX3/exec",
+    ACTIVE_STATUSES: ["DALAM PROSES", "PENGERINGAN", "READY TO DELIVER", "SELESAI DIHANTAR"],
+    LOGO_URL: "https://raw.githubusercontent.com/Mrehman84/MYCARPET_PRO/main/logo_westberry.png"
+};
+
+let STATE = {
+    senaraiHarga: [],
+    pelanggan: [],
+    tempahan: [],
+    karpet: [],
+    payment: [],
+    expenses: [],
+    carpetRowCount: 0,
+    isLoading: false
+};
+
+function $(s, c=document) { return c.querySelector(s); }
+function $$(s, c=document) { return [...c.querySelectorAll(s)]; }
+
+function getField(row, names, fallback="") {
+    if (!row || typeof row !== 'object') return fallback;
+    const norm = names.map(n => String(n).toUpperCase().trim());
+    for (let key of Object.keys(row)) {
+        if (norm.includes(String(key).toUpperCase().trim())) {
+            const v = row[key];
+            return (v !== undefined && v !== null) ? v : fallback;
+        }
+    }
+    return fallback;
+}
+
+function getNumber(v) {
+    const n = parseFloat(String(v || "0").replace(/[RM,]/g, '').trim());
+    return isNaN(n) ? 0 : n;
+}
+
+function formatMoney(v) { return "RM " + getNumber(v).toFixed(2); }
+
+function escapeHtml(t) {
+    if (!t) return '';
+    return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function normalize(s) { return String(s || "").trim().toUpperCase(); }
+
+function showLoading(show) {
+    const el = $('#loadingOverlay');
+    if (el) el.classList.toggle('active', show);
+}
+
+function getToday() { return new Date().toISOString().split('T')[0]; }
+function addDays(date, days) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().split('T')[0];
+}
+function formatDateMY(dateStr) {
+    if (!dateStr) return '-';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+}
+
+// ============================================================
+// API CALLS (JSONP untuk GET & POST tanpa CORS issue)
+// ============================================================
+function fetchData() {
+    if (STATE.isLoading) return;
+    showLoading(true);
+    $$('script[data-jsonp]').forEach(el => el.remove());
+    const cbName = 'jsonp_' + Date.now() + '_' + Math.random().toString(36).substr(2,5);
+    const timeout = setTimeout(() => {
+        cleanupJsonp(cbName); showLoading(false);
+        alert('Masa muat turun tamat. Sila semak sambungan.');
+    }, 30000);
+
+    window[cbName] = function(resp) {
+        clearTimeout(timeout);
+        try {
+            if (!resp || typeof resp !== 'object') throw new Error('Respons tidak sah');
+            STATE.senaraiHarga = Array.isArray(resp.senaraiHarga) ? resp.senaraiHarga : [];
+            STATE.pelanggan = Array.isArray(resp.pelanggan) ? resp.pelanggan : [];
+            STATE.tempahan = Array.isArray(resp.tempahan) ? resp.tempahan : [];
+            STATE.karpet = Array.isArray(resp.karpet) ? resp.karpet : [];
+            STATE.payment = Array.isArray(resp.payment) ? resp.payment : [];
+            STATE.expenses = Array.isArray(resp.expenses) ? resp.expenses : [];
+            refreshAllUI();
+        } catch(e) { console.error(e); alert('Ralat memproses data.'); }
+        finally { showLoading(false); cleanupJsonp(cbName); }
+    };
+
+    const script = document.createElement('script');
+    script.id = cbName; script.dataset.jsonp = 'true';
+    script.src = CONFIG.GAS_API_URL + '?action=readAll&callback=' + encodeURIComponent(cbName);
+    script.onerror = function() {
+        clearTimeout(timeout); showLoading(false); cleanupJsonp(cbName);
+        alert('Gagal hubungi Google Apps Script.');
+    };
+    document.body.appendChild(script);
+}
+
+function cleanupJsonp(name) {
+    const el = document.getElementById(name); if (el) el.remove();
+    try { delete window[name]; } catch(e) {}
+}
+
+async function postData(data) {
+    showLoading(true);
+    try {
+        await fetch(CONFIG.GAS_API_URL, {
+            method: 'POST', mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        return { success: true };
+    } catch(e) { console.error(e); throw e; }
+    finally { showLoading(false); }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function switchTab(tabId) {
+    $$('.tab-content').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    $$('.menu-item').forEach(el => el.classList.remove('active'));
+    const menu = $(`.menu-item[data-tab="${tabId}"]`);
+    if (menu) menu.classList.add('active');
+
+    if (tabId === 'tracking') { populateTrackingDropdown(); executeGlobalSearch(); }
+    if (tabId === 'invoice') { populateInvoiceDropdown(); renderInvoice(); }
+    if (tabId === 'payment') { populatePaymentDropdown(); loadPaymentData(); }
+    if (tabId === 'barcode') { populateBarcodeDropdown(); generateBarcodes(); }
+    if (tabId === 'harga') renderHargaTable();
+    if (window.innerWidth <= 992) document.body.classList.remove('sidebar-open');
+}
+
+function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+
+// ============================================================
+// REFRESH ALL UI
+// ============================================================
+function refreshAllUI() {
+    renderDashboard();
+    populateCustomerDropdown();
+    resetCarpetRows();
+    populateTrackingDropdown();
+    executeGlobalSearch();
+    populateInvoiceDropdown();
+    renderInvoice();
+    populatePaymentDropdown();
+    loadPaymentData();
+    populateBarcodeDropdown();
+    generateBarcodes();
+    renderHargaTable();
+    renderLejar();
+}
+
+// ============================================================
+// 1. DASHBOARD
+// ============================================================
+function renderDashboard() {
+    let p=0,c=0,r=0,s=0;
+    STATE.karpet.forEach(k => {
+        const st = normalize(getField(k, ['STATUS','STATUS KARPET']));
+        if (st === 'DALAM PROSES') p++;
+        else if (st === 'PENGERINGAN' || st === 'SEDANG DICUCI') c++;
+        else if (st === 'READY TO DELIVER') r++;
+        else if (st === 'SELESAI' || st === 'SELESAI DIHANTAR' || st === 'DELIVERED') s++;
+    });
+    document.getElementById('countProses').textContent = p;
+    document.getElementById('countCuci').textContent = c;
+    document.getElementById('countReady').textContent = r;
+    document.getElementById('countSelesai').textContent = s;
+
+    const tbody = document.getElementById('dashboardTableBody');
+    tbody.innerHTML = '';
+    const items = STATE.karpet.slice(-10).reverse();
+    if (!items.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">Tiada rekod</td></tr>';
+        return;
+    }
+    items.forEach(k => {
+        const st = normalize(getField(k, ['STATUS','STATUS KARPET']));
+        const badge = st==='READY TO DELIVER'?'badge-ready':
+                      (st==='SELESAI'||st==='SELESAI DIHANTAR'||st==='DELIVERED')?'badge-selesai':
+                      (st==='PENGERINGAN'||st==='SEDANG DICUCI')?'badge-cuci':'badge-proses';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${escapeHtml(getField(k,['QR ID','QR_ID']))}</strong></td>
+            <td>${escapeHtml(getField(k,['INV NO','INV_NO','NO INVOIS']))}</td>
+            <td>${escapeHtml(getField(k,['JENIS','JENIS CARPET']))}</td>
+            <td>${formatMoney(getField(k,['HARGA','HARGA OPEN']))}</td>
+            <td>${escapeHtml(String(getField(k,['TARIKH'],'')).split('T')[0]||'-')}</td>
+            <td><span class="badge ${badge}">${escapeHtml(st)}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// ============================================================
+// 2. TEMUJANJI
+// ============================================================
+function janaMesejJanji() {
+    const nama = document.getElementById('tjNama').value.trim();
+    const telefon = document.getElementById('tjTelefon').value.trim();
+    const alamat = document.getElementById('tjAlamat').value.trim();
+    const tarikh = document.getElementById('tjTarikh').value;
+    const masa = document.getElementById('tjMasa').value;
+    if (!nama || !alamat || !tarikh || !masa) { alert('Sila lengkapkan semua maklumat.'); return; }
+    const msg = `*Pusat Cucian Karpet MyCarpetPro v2.0*\nSlot janji temu untuk pengambilan karpet anda telah dimasukkan ke dalam sistem kami:\n🗓️ *Tarikh:* ${formatDateMY(tarikh)}\n⏰ *Masa:* ${masa}\n📍 *Alamat:* ${alamat}\nSila maklumkan kepada kami jika anda perlu menukar slot ini. Terima kasih! 🙏`;
+    const preview = document.getElementById('mesejPreview');
+    preview.textContent = msg; preview.classList.remove('hidden');
+    if (navigator.clipboard) navigator.clipboard.writeText(msg).then(() => alert('Mesej disalin.')).catch(() => alert(msg));
+    else alert(msg);
+}
+function hantarWhatsAppJanji() {
+    const telefon = document.getElementById('tjTelefon').value.trim();
+    if (!telefon) { alert('Sila masukkan nombor telefon pelanggan.'); return; }
+    const preview = document.getElementById('mesejPreview');
+    let msg = preview.textContent;
+    if (!msg || preview.classList.contains('hidden')) { janaMesejJanji(); msg = preview.textContent; }
+    window.open(`https://wa.me/60${telefon.replace(/^0+/, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// ============================================================
+// 3. TEMPAHAN (Isu x0 Sudah Dibetulkan)
+// ============================================================
+function toggleCustType() {
+    const isNew = document.querySelector('input[name="custType"]:checked').value === 'baru';
+    document.getElementById('secCustLama').style.display = isNew ? 'none' : 'block';
+    document.getElementById('secCustBaru').style.display = isNew ? 'block' : 'none';
+    if (isNew) clearCustomerForm();
+}
+function populateCustomerDropdown() {
+    const sel = document.getElementById('optPelanggan');
+    sel.innerHTML = '<option value="">-- Pilih --</option>';
+    STATE.pelanggan.forEach(c => {
+        const id = String(getField(c,['CUSTOMER ID','CUSTOMER_ID'])).trim();
+        if (!id) return;
+        const nama = getField(c,['NAMA'],'');
+        const alamat = getField(c,['ALAMAT'],'');
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = `${id} - ${alamat}${nama?' | '+nama:''}`;
+        sel.appendChild(opt);
+    });
+}
+function loadCustomerDetails() {
+    const id = document.getElementById('optPelanggan').value;
+    const c = STATE.pelanggan.find(p => String(getField(p,['CUSTOMER ID','CUSTOMER_ID'])).trim() === id);
+    if (!c) return;
+    document.getElementById('custNama').value = getField(c,['NAMA'],'');
+    document.getElementById('custTel').value = getField(c,['TELEFON','NO TELEFON'],'');
+    document.getElementById('custAlamat').value = getField(c,['ALAMAT'],'');
+    document.getElementById('custDaerah').value = getField(c,['DAERAH'],'');
+}
+function clearCustomerForm() {
+    ['custNama','custTel','custAlamat','custDaerah'].forEach(id => document.getElementById(id).value = '');
+}
+
+// --- LOGIK HARGA DARI SENARAI_HARGA (Tanpa x0) ---
+function buildPriceOptions(select) {
+    select.innerHTML = '<option value="">-- Pilih Kod --</option>';
+    STATE.senaraiHarga.forEach(p => {
+        const kod = String(getField(p,['KOD'])).trim().toUpperCase();
+        if (!kod) return;
+        const jenis = getField(p,['JENIS CARPET'],'');
+        const lebar = getNumber(getField(p,['LEBAR'],0));
+        const panjang = getNumber(getField(p,['PANJANG'],0));
+        const hargaSqft = getNumber(getField(p,['HARGA_SQFT'], getField(p,['HARGA OPEN'],0)));
+        const luas = lebar * panjang;
+        const harga = luas * hargaSqft;
+        const opt = document.createElement('option');
+        opt.value = kod;
+        opt.textContent = `${kod} - ${jenis} (${lebar}'x${panjang}')`;
+        opt.dataset.lebar = lebar; opt.dataset.panjang = panjang;
+        opt.dataset.hargaSqft = hargaSqft; opt.dataset.harga = harga;
+        opt._mycarpet = { kod, jenis, lebar, panjang, hargaSqft, harga, luas };
+        select.appendChild(opt);
+    });
+    if (!STATE.senaraiHarga.some(p => normalize(getField(p,['KOD'])) === 'CUSTOM')) {
+        const opt = document.createElement('option');
+        opt.value = 'CUSTOM'; opt.textContent = 'CUSTOM - Saiz Manual';
+        opt.dataset.lebar = 0; opt.dataset.panjang = 0;
+        opt.dataset.hargaSqft = 0; opt.dataset.harga = 0;
+        opt._mycarpet = { kod:'CUSTOM', jenis:'CUSTOM', lebar:0, panjang:0, hargaSqft:0, harga:0, luas:0 };
+        select.appendChild(opt);
+    }
+}
+
+function resetCarpetRows() {
+    document.getElementById('carpetItemsContainer').innerHTML = '';
+    STATE.carpetRowCount = 0;
+    addCarpetRow();
+}
+function addCarpetRow() {
+    STATE.carpetRowCount++;
+    const container = document.getElementById('carpetItemsContainer');
+    const rowId = 'carpetRow_'+STATE.carpetRowCount;
+    const div = document.createElement('div');
+    div.className = 'row card-item-row';
+    div.id = rowId;
+    div.style.cssText = 'padding:12px;background:#fcfcfc;border:1px solid #edf2f7;border-radius:8px;margin-bottom:12px;';
+
+    const col1 = document.createElement('div'); col1.className = 'col form-group'; col1.style.flex = '1.7';
+    const lbl1 = document.createElement('label'); lbl1.textContent = 'Kod';
+    const sel = document.createElement('select'); sel.className = 'form-control select-kod-karpet';
+    buildPriceOptions(sel);
+    sel.onchange = function() { handleCodeSelection(rowId); };
+    const info = document.createElement('div');
+    info.className = 'jenis-vlookup-info';
+    info.style.cssText = 'margin-top:6px;padding:6px 10px;border-radius:6px;background:#edf6ff;color:#2b6cb0;font-size:13px;min-height:32px;';
+    info.textContent = 'Jenis & harga auto.';
+    col1.append(lbl1, sel, info);
+
+    const col2 = document.createElement('div'); col2.className = 'col form-group'; col2.style.maxWidth = '100px';
+    const lbl2 = document.createElement('label'); lbl2.textContent = 'Qty';
+    const qty = document.createElement('input');
+    qty.type = 'number'; qty.min = 1; qty.step = 1; qty.value = 1;
+    qty.className = 'form-control inp-qty'; qty.oninput = calculateGrandTotal;
+    col2.append(lbl2, qty);
+
+    const col3 = document.createElement('div'); col3.className = 'col form-group sub-custom-dimensions';
+    col3.style.cssText = 'display:none;max-width:220px';
+    const lbl3 = document.createElement('label'); lbl3.textContent = 'Dimensi (L x P kaki)';
+    const wrap = document.createElement('div'); wrap.style.cssText = 'display:flex;gap:5px;align-items:center';
+    const w = document.createElement('input'); w.type='number'; w.min=0; w.className='form-control inp-width'; w.placeholder='L';
+    const x = document.createElement('span'); x.textContent = 'x';
+    const h = document.createElement('input'); h.type='number'; h.min=0; h.className='form-control inp-height'; h.placeholder='P';
+    w.oninput = function() { calculateRowPrice(rowId); };
+    h.oninput = function() { calculateRowPrice(rowId); };
+    wrap.append(w, x, h); col3.append(lbl3, wrap);
+
+    const col4 = document.createElement('div'); col4.className = 'col form-group'; col4.style.maxWidth = '140px';
+    const lbl4 = document.createElement('label'); lbl4.textContent = 'Harga (RM)';
+    const price = document.createElement('input');
+    price.type = 'number'; price.step = '0.01'; price.min = 0; price.value = '0.00';
+    price.className = 'form-control inp-harga-final'; price.style.fontWeight = '600'; price.oninput = calculateGrandTotal;
+    col4.append(lbl4, price);
+
+    const col5 = document.createElement('div'); col5.style.cssText = 'display:flex;align-items:center;margin-top:5px';
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'btn btn-danger btn-sm';
+    del.innerHTML = '<i class="fa-solid fa-trash"></i>'; del.onclick = function() { removeCarpetRow(rowId); };
+    col5.appendChild(del);
+    div.append(col1, col2, col3, col4, col5); container.appendChild(div);
+    calculateGrandTotal();
+}
+
+function handleCodeSelection(rowId) {
+    const row = document.getElementById(rowId); if (!row) return;
+    const sel = row.querySelector('.select-kod-karpet');
+    const price = row.querySelector('.inp-harga-final');
+    const custom = row.querySelector('.sub-custom-dimensions');
+    const info = row.querySelector('.jenis-vlookup-info');
+    const opt = sel.options[sel.selectedIndex];
+    const data = opt?._mycarpet || { jenis:'', lebar:0, panjang:0, hargaSqft:0, harga:0, luas:0 };
+    if (sel.value === 'CUSTOM') {
+        custom.style.display = 'block'; info.textContent = 'CUSTOM: masukkan saiz, harga auto.';
+        price.value = '0.00'; calculateRowPrice(rowId); return;
+    }
+    custom.style.display = 'none';
+    const luas = data.luas || 0; const hargaSqft = data.hargaSqft || 0;
+    const harga = data.harga || (luas * hargaSqft);
+    info.innerHTML = `<strong>${escapeHtml(data.jenis||'')}</strong> (${data.lebar}'x${data.panjang}')<br>Luas: ${luas} kaki² × RM${hargaSqft.toFixed(2)} = ${formatMoney(harga)}`;
+    price.value = harga.toFixed(2); calculateGrandTotal();
+}
+
+function calculateRowPrice(rowId) {
+    const row = document.getElementById(rowId); if (!row) return;
+    const sel = row.querySelector('.select-kod-karpet'); if (sel.value !== 'CUSTOM') return;
+    const w = getNumber(row.querySelector('.inp-width').value);
+    const h = getNumber(row.querySelector('.inp-height').value);
+    const price = row.querySelector('.inp-harga-final');
+    if (price) price.value = (w * h * 2.50).toFixed(2);
+    calculateGrandTotal();
+}
+function calculateGrandTotal() {
+    let total = 0;
+    $$('.card-item-row').forEach(row => {
+        total += getNumber(row.querySelector('.inp-qty').value || 1) * getNumber(row.querySelector('.inp-harga-final').value || 0);
+    });
+    document.getElementById('grandTotalLabel').textContent = formatMoney(total);
+}
+function removeCarpetRow(rowId) {
+    if ($$('.card-item-row').length <= 1) { alert('Perlu sekurang-kurangnya satu item.'); return; }
+    document.getElementById(rowId)?.remove(); calculateGrandTotal();
+}
+
+async function simpanTempahan() {
+    try {
+        const isNew = document.querySelector('input[name="custType"]:checked').value === 'baru';
+        const customer = {
+            id: isNew ? '' : document.getElementById('optPelanggan').value,
+            nama: document.getElementById('custNama').value.trim(),
+            telefon: document.getElementById('custTel').value.trim(),
+            alamat: document.getElementById('custAlamat').value.trim(),
+            daerah: document.getElementById('custDaerah').value.trim()
+        };
+        if (!customer.nama || !customer.telefon || !customer.alamat) { alert('Sila lengkapkan maklumat pelanggan.'); return; }
+        const items = []; let valid = true;
+        $$('.card-item-row').forEach(row => {
+            const sel = row.querySelector('.select-kod-karpet'); if (!sel.value) { valid = false; return; }
+            const opt = sel.options[sel.selectedIndex]; const data = opt?._mycarpet || {};
+            const qty = Math.max(1, getNumber(row.querySelector('.inp-qty').value || 1));
+            const harga = getNumber(row.querySelector('.inp-harga-final').value || 0);
+            let jenis = data.jenis || ''; let dimensi = `${data.lebar || 0} x ${data.panjang || 0}`;
+            if (sel.value === 'CUSTOM') {
+                const w = row.querySelector('.inp-width').value || 0; const h = row.querySelector('.inp-height').value || 0;
+                dimensi = `${w} x ${h}`; jenis = `CUSTOM (${w} x ${h} kaki)`;
             }
-        }
+            items.push({ kod: sel.value, jenis: jenis, dimensi: dimensi, harga: harga, qty: qty, subtotal: qty * harga });
+        });
+        if (!valid || !items.length) { alert('Pastikan semua kod karpet dipilih.'); return; }
+        const total = items.reduce((sum, i) => sum + i.subtotal, 0);
+        const today = getToday(); const tarikhSiap = addDays(today, 7);
+        await postData({ action: 'createOrder', isNewCustomer: isNew, customer: customer, items: items });
+        const msg = binaMesejTempahan({ invNo: 'INV' + Date.now().toString().slice(-7), tarikhAmbil: today, tarikhSiap: tarikhSiap, items: items, total: total, customer: customer });
+        const preview = document.getElementById('tempahanPreview'); preview.textContent = msg; preview.classList.remove('hidden');
+        document.getElementById('tempahanWhatsAppBtn').classList.remove('hidden');
+        alert('Tempahan berjaya dihantar! Sila salin atau hantar mesej WhatsApp.');
+        clearCustomerForm(); resetCarpetRows(); await fetchData(); switchTab('dashboard');
+    } catch(e) { console.error(e); alert('Ralat menyimpan data. Sila cuba lagi.'); }
+}
+function binaMesejTempahan(order) {
+    let itemsText = '';
+    order.items.forEach((item, i) => { itemsText += ` ${i+1}. ${item.jenis} (${item.dimensi}) x${item.qty} = ${formatMoney(item.subtotal)}\n`; });
+    return `🧺 *MYCARPET PRO v2.0*\nPelanggan yang dihormati, karpet anda telah selamat diambil dan akan diproses.\n\n🧾 *No Invoice:* ${order.invNo} - (${order.customer.nama}, ${order.customer.alamat})\n📅 *Tarikh Ambil:* ${formatDateMY(order.tarikhAmbil)}\n📆 *Tarikh Siap:* ${formatDateMY(order.tarikhSiap)}\n\n📝 *Butiran Jenis Karpet:*\n${itemsText}\n💰 *Jumlah:* ${formatMoney(order.total)}\nTerima kasih! 🙏`;
+}
+function hantarWhatsAppTempahan() {
+    const cust = STATE.lastOrderCustomer; if (!cust || !cust.telefon) { alert('Tiada maklumat pelanggan.'); return; }
+    const preview = document.getElementById('tempahanPreview'); let msg = preview.textContent;
+    if (!msg || preview.classList.contains('hidden')) { alert('Sila simpan tempahan dahulu.'); return; }
+    window.open(`https://wa.me/60${cust.telefon.replace(/^0+/, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+}
 
-        // 2. NAVIGASI TAB
-        function switchTab(tabId) {
-            document.querySelectorAll('.section-container').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
-        }
+// ============================================================
+// 4. TRACKING
+// ============================================================
+function populateTrackingDropdown() {
+    const sel = document.getElementById('trackingInvoiceSelect'); const cur = sel.value;
+    sel.innerHTML = '<option value="">-- Semua --</option>'; const seen = new Set();
+    STATE.karpet.forEach(k => {
+        const st = normalize(getField(k, ['STATUS','STATUS KARPET']));
+        if (!CONFIG.ACTIVE_STATUSES.includes(st)) return;
+        const inv = String(getField(k, ['INV NO','INV_NO','NO INVOIS'])).trim(); if (!inv || seen.has(inv)) return;
+        seen.add(inv); const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) || {};
+        const cust = STATE.pelanggan.find(c => String(getField(c,['CUSTOMER ID','CUSTOMER_ID'])).trim() === String(getField(order,['CUSTOMER ID','CUSTOMER_ID'])).trim()) || {};
+        const opt = document.createElement('option'); opt.value = inv;
+        opt.textContent = `${inv} — ${getField(cust,['ALAMAT'],'')}${getField(cust,['NAMA'],'') ? ' | '+getField(cust,['NAMA'],'') : ''}`;
+        sel.appendChild(opt);
+    });
+    if (cur && [...sel.options].some(o=>o.value===cur)) sel.value = cur;
+}
+function executeGlobalSearch() {
+    const tbody = document.getElementById('trackingTableBody'); tbody.innerHTML = '';
+    const selInv = document.getElementById('trackingInvoiceSelect').value;
+    const search = document.getElementById('searchBox').value.trim().toLowerCase();
+    let filtered = STATE.karpet.filter(k => {
+        const st = normalize(getField(k, ['STATUS','STATUS KARPET']));
+        if (!CONFIG.ACTIVE_STATUSES.includes(st)) return false;
+        const inv = String(getField(k, ['INV NO','INV_NO','NO INVOIS'])).trim();
+        const qr = String(getField(k, ['QR ID','QR_ID'])).trim();
+        if (selInv && normalize(inv) !== normalize(selInv)) return false;
+        if (search && !qr.toLowerCase().includes(search) && !inv.toLowerCase().includes(search)) return false;
+        return true;
+    });
+    if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7" class="text-center muted">Tiada hasil</td></tr>'; updateCheckedCount(); return; }
+    filtered.reverse().forEach(k => {
+        const inv = String(getField(k, ['INV NO','INV_NO','NO INVOIS'])).trim();
+        const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) || {};
+        const cust = STATE.pelanggan.find(c => String(getField(c,['CUSTOMER ID','CUSTOMER_ID'])).trim() === String(getField(order,['CUSTOMER ID','CUSTOMER_ID'])).trim()) || {};
+        const qr = String(getField(k, ['QR ID','QR_ID'])).trim();
+        const st = normalize(getField(k, ['STATUS','STATUS KARPET']));
+        const badge = st==='READY TO DELIVER'?'badge-ready':st==='PENGERINGAN'?'badge-cuci':'badge-proses';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="checkbox" class="row-checkbox" value="${escapeHtml(qr)}"></td>
+            <td><strong>${escapeHtml(qr)}</strong><br><small>${escapeHtml(inv)}</small></td>
+            <td><strong>${escapeHtml(getField(cust,['NAMA'],'TIADA'))}</strong><br><small>${escapeHtml(getField(cust,['ALAMAT'],''))}</small></td>
+            <td>${escapeHtml(getField(k,['JENIS','JENIS CARPET']))}</td>
+            <td>${formatMoney(getField(k,['HARGA','HARGA OPEN']))}</td>
+            <td><span class="badge ${badge}">${escapeHtml(st)}</span></td>
+            <td><button class="btn btn-secondary btn-sm" onclick="tukarStatusSingle('${escapeHtml(qr)}')"><i class="fa-solid fa-edit"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+    $$('.row-checkbox').forEach(cb => cb.onchange = updateCheckedCount); updateCheckedCount();
+}
+function toggleSelectAll(master) { $$('.row-checkbox').forEach(cb => cb.checked = master.checked); updateCheckedCount(); }
+function updateCheckedCount() { document.getElementById('checkedCountLabel').textContent = $$('.row-checkbox:checked').length + ' item dipilih'; }
+function tukarStatusSingle(qrId) {
+    const k = STATE.karpet.find(x => String(getField(x,['QR ID','QR_ID'])).trim() === qrId);
+    if (!k) return alert('Karpet tidak dijumpai.');
+    const cur = normalize(getField(k, ['STATUS','STATUS KARPET']));
+    const baru = prompt(`Status semasa: ${cur}\nMasukkan status baru:\nDALAM PROSES\nPENGERINGAN\nREADY TO DELIVER\nSELESAI DIHANTAR`, cur);
+    if (!baru) return; const norm = normalize(baru);
+    if (!CONFIG.ACTIVE_STATUSES.includes(norm)) return alert('Status tidak sah.');
+    updateStatuses([qrId], norm);
+}
+async function submitBatchUpdate() {
+    const checked = $$('.row-checkbox:checked');
+    if (!checked.length) return alert('Pilih sekurang-kurangnya satu item.');
+    const ids = checked.map(cb => cb.value);
+    const status = document.getElementById('batchStatusOpt').value;
+    await updateStatuses(ids, status);
+}
+async function updateStatuses(qrIds, status) {
+    try { await postData({ action: 'updateBatchStatus', qrIds, status }); alert('Status dikemas kini.'); document.getElementById('masterCheck').checked = false; await fetchData(); }
+    catch(e) { alert('Gagal kemas kini.'); }
+}
 
-        // 3. POPULATE DROPDOWNS
-        function populateDropdowns() {
-            // Pelanggan
-            const custSelect = document.getElementById('cust-select');
-            custSelect.innerHTML = '<option value="">-- Pilih Pelanggan --</option>';
-            globalData.pelanggan.forEach(p => {
-                custSelect.innerHTML += `<option value="${p['CUSTOMER ID']}">${p['NAMA']} (${p['CUSTOMER ID']})</option>`;
-            });
+// ============================================================
+// 5. PEMBAYARAN (Dropdown Alamat Disertakan)
+// ============================================================
+function populatePaymentDropdown() {
+    const sel = document.getElementById('paymentInvoiceSelect'); const cur = sel.value;
+    sel.innerHTML = '<option value="">-- Pilih --</option>';
+    const invs = new Set();
+    STATE.karpet.forEach(k => { const inv = String(getField(k, ['INV NO','INV_NO','NO INVOIS'])).trim(); if (inv) invs.add(inv); });
+    invs.forEach(inv => {
+        const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) || {};
+        const cust = STATE.pelanggan.find(c => String(getField(c,['CUSTOMER ID','CUSTOMER_ID'])).trim() === String(getField(order,['CUSTOMER ID','CUSTOMER_ID'])).trim()) || {};
+        const opt = document.createElement('option'); opt.value = inv;
+        opt.textContent = `${inv} - ${getField(cust,['NAMA'],'')} - ${getField(cust,['ALAMAT'],'')}`;
+        sel.appendChild(opt);
+    });
+    if (cur && [...sel.options].some(o=>o.value===cur)) sel.value = cur;
+}
+function loadPaymentData() {
+    const inv = document.getElementById('paymentInvoiceSelect').value; const info = document.getElementById('paymentInfo');
+    if (!inv) { info.style.display = 'none'; return; } info.style.display = 'block';
+    let total = 0; STATE.karpet.forEach(k => { if (normalize(getField(k, ['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) total += getNumber(getField(k, ['HARGA','HARGA OPEN'])); });
+    let deposit = 0; STATE.payment.forEach(p => { if (normalize(getField(p, ['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) deposit += getNumber(getField(p, ['AMAUN DIBAYAR','AMOUNT'])); });
+    document.getElementById('payTotal').value = formatMoney(total); document.getElementById('payDeposit').value = formatMoney(deposit); document.getElementById('payBalance').value = formatMoney(Math.max(0, total - deposit));
+    const hist = document.getElementById('paymentHistory'); const payments = STATE.payment.filter(p => normalize(getField(p, ['INV NO','INV_NO','NO INVOIS'])) === normalize(inv));
+    hist.innerHTML = '<strong>Sejarah Bayaran</strong>';
+    if (payments.length) {
+        const ul = document.createElement('ul'); ul.style.cssText = 'list-style:none;padding:0;margin-top:8px;';
+        payments.forEach(p => { const li = document.createElement('li'); li.style.cssText = 'padding:4px 0;border-bottom:1px solid #eee;'; li.textContent = `${getField(p,['TARIKH','DATE'],'')} - RM${getNumber(getField(p,['AMAUN DIBAYAR','AMOUNT'])).toFixed(2)}`; ul.appendChild(li); }); hist.appendChild(ul);
+    } else hist.innerHTML += '<p class="muted">Tiada rekod bayaran.</p>';
+}
+async function rekodBayaran() {
+    const inv = document.getElementById('paymentInvoiceSelect').value; if (!inv) return alert('Sila pilih invois.');
+    const amount = getNumber(document.getElementById('payAmount').value); if (amount <= 0) return alert('Masukkan jumlah bayaran yang sah.');
+    const date = getToday(); await postData({ action: 'addPayment', invNo: inv, amount: amount, date: date });
+    alert('Bayaran direkodkan.'); document.getElementById('payAmount').value = ''; await fetchData(); loadPaymentData();
+}
 
-            // Karpet & Harga (Tempahan)
-            const carpetSelect = document.getElementById('carpet-select');
-            carpetSelect.innerHTML = '<option value="">-- Pilih Karpet --</option>';
-            globalData.senaraiHarga.forEach(item => {
-                const label = `${item['KOD']} - ${item['JENIS CARPET']} (RM ${item['HARGA_SQFT']}/sqft)`;
-                carpetSelect.innerHTML += `<option value='${JSON.stringify(item)}'>${label}</option>`;
-            });
-            carpetSelect.onchange = function() {
-                if(this.value) {
-                    const data = JSON.parse(this.value);
-                    const luas = data['LEBAR'] * data['PANJANG'];
-                    const total = luas * data['HARGA_SQFT'];
-                    document.getElementById('price-display').value = total.toFixed(2);
-                } else {
-                    document.getElementById('price-display').value = "";
-                }
-            };
+// ============================================================
+// 6. INVOIS (PDF Menggunakan html2pdf, Tanpa Masa, Tanpa Tajuk "MYCARPET PRO")
+// ============================================================
+function populateInvoiceDropdown() {
+    const sel = document.getElementById('invoiceSelect'); const cur = sel.value;
+    sel.innerHTML = '<option value="">-- Pilih --</option>'; const invs = new Set();
+    STATE.karpet.forEach(k => {
+        const inv = String(getField(k, ['INV NO','INV_NO','NO INVOIS'])).trim();
+        const st = normalize(getField(k, ['STATUS','STATUS KARPET']));
+        if (inv && st !== 'SELESAI DIHANTAR' && st !== 'DELIVERED') invs.add(inv);
+    });
+    if (!invs.size) { STATE.tempahan.forEach(o => { const inv = String(getField(o, ['INV NO','INV_NO','NO INVOIS'])).trim(); if (inv) invs.add(inv); }); }
+    invs.forEach(inv => {
+        const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) || {};
+        const cust = STATE.pelanggan.find(c => String(getField(c,['CUSTOMER ID','CUSTOMER_ID'])).trim() === String(getField(order,['CUSTOMER ID','CUSTOMER_ID'])).trim()) || {};
+        const opt = document.createElement('option'); opt.value = inv;
+        opt.textContent = `${inv} - ${getField(cust,['NAMA'],'')} - ${getField(cust,['ALAMAT'],'')}`;
+        sel.appendChild(opt);
+    });
+    if (cur && [...sel.options].some(o=>o.value===cur)) sel.value = cur;
+}
 
-            // Invois & Barcode Dropdown (Dengan ALAMAT)
-            const invSelect = document.getElementById('invoice-select');
-            const bcSelect = document.getElementById('barcode-select');
-            invSelect.innerHTML = '<option value="">-- Sila Pilih Invois --</option>';
-            bcSelect.innerHTML = '<option value="">-- Sila Pilih Invois --</option>';
+function getInvoiceItems(inv) {
+    return STATE.karpet.filter(k => normalize(getField(k, ['INV NO','INV_NO','NO INVOIS'])) === normalize(inv))
+           .map(k => ({ nama: getField(k, ['JENIS','JENIS CARPET'], 'CUCIAN'), qr: getField(k, ['QR ID','QR_ID'], ''), qty: 1, harga: getNumber(getField(k, ['HARGA','HARGA OPEN'])), total: getNumber(getField(k, ['HARGA','HARGA OPEN'])) }));
+}
+function getDeposit(inv) {
+    let total = 0; STATE.payment.forEach(p => { if (normalize(getField(p, ['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) total += getNumber(getField(p, ['AMAUN DIBAYAR','AMOUNT'])); });
+    if (!total) { const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)); if (order) total = getNumber(getField(order, ['DEPOSIT','DEPOSIT DIBAYAR','JUMLAH DEPOSIT'])); }
+    return total;
+}
+function getInvoiceStatus(inv) {
+    const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv));
+    if (!order) return 'PENDING'; return normalize(getField(order, ['STATUS'], 'PENDING'));
+}
 
-            globalData.tempahan.forEach(t => {
-                const cust = globalData.pelanggan.find(p => p['CUSTOMER ID'] === t['CUSTOMER ID']);
-                const nama = cust ? cust['NAMA'] : t['CUSTOMER ID'];
-                const alamat = cust ? cust['ALAMAT'] : "-";
-                // TAMPILKAN ALAMAT DALAM DROPDOWN
-                const label = `${t['INV NO']} - ${nama} - ${alamat}`;
-                const opt = `<option value="${t['INV NO']}">${label}</option>`;
-                invSelect.innerHTML += opt;
-                bcSelect.innerHTML += opt;
-            });
-            
-            invSelect.onchange = () => renderInvoicePreview();
-            bcSelect.onchange = () => renderBarcodePreview();
-        }
+function renderInvoice() {
+    var container = document.getElementById('invoicePreviewContainer'); var inv = document.getElementById('invoiceSelect').value;
+    if (!inv) { container.innerHTML = '<div class="card muted">Sila pilih invoice.</div>'; return; }
+    var order = STATE.tempahan.find(function(o) { return normalize(getField(o, ['INV NO', 'INV_NO', 'NO INVOIS'])) === normalize(inv); }) || {};
+    var cust = STATE.pelanggan.find(function(c) { return String(getField(c, ['CUSTOMER ID', 'CUSTOMER_ID'])).trim() === String(getField(order, ['CUSTOMER ID', 'CUSTOMER_ID'])).trim(); }) || {};
+    var nama = getField(cust, ['NAMA'], getField(order, ['NAMA'], '-')); var telefon = getField(cust, ['TELEFON', 'NO TELEFON'], getField(order, ['TELEFON'], '-'));
+    var alamat = getField(cust, ['ALAMAT'], getField(order, ['ALAMAT'], '-')); var daerah = getField(cust, ['DAERAH'], getField(order, ['DAERAH'], '-'));
+    var tarikh = String(getField(order, ['TARIKH', 'DATE'], getToday())).split('T')[0];
+    var status = getInvoiceStatus(inv); var isPaid = (status === 'PAID' || status === 'LUNAS' || status === 'SELESAI');
+    var statusClass = isPaid ? 'status-paid' : 'status-pending'; var statusText = isPaid ? '✅ PAID (LUNAS)' : '⏳ PENDING (BELUM LUNAS)';
+    var items = getInvoiceItems(inv);
+    if (!items.length) { var totalFromOrder = getNumber(getField(order, ['JUMLAH HARGA', 'TOTAL'])); if (totalFromOrder) items = [{ nama: 'PERKHIDMATAN CUCIAN', qr: '', qty: 1, harga: totalFromOrder, total: totalFromOrder }]; }
+    var subtotal = items.reduce(function(s, i) { return s + i.total; }, 0); var extraName = document.getElementById('extraServiceName').value.trim(); var extraPrice = getNumber(document.getElementById('extraServicePrice').value);
+    var deposit = getDeposit(inv); var total = subtotal + extraPrice; var baki = Math.max(0, total - deposit);
+    var rows = '';
+    items.forEach(function(item, i) {
+        var itemRow = '<tr>'; itemRow += '<td>' + (i + 1) + '</td>'; itemRow += '<td>' + escapeHtml(item.nama);
+        if (item.qr) itemRow += '<br><small>QR: ' + escapeHtml(item.qr) + '</small>'; itemRow += '</td>';
+        itemRow += '<td>' + item.qty + '</td>'; itemRow += '<td>' + formatMoney(item.harga) + '</td>'; itemRow += '<td>' + formatMoney(item.total) + '</td>'; itemRow += '</tr>'; rows += itemRow;
+    });
+    if (extraName && extraPrice > 0) {
+        var extraRow = '<tr>'; extraRow += '<td>' + (items.length + 1) + '</td>'; extraRow += '<td>' + escapeHtml(extraName.toUpperCase()) + ' (TAMBAHAN)</td>';
+        extraRow += '<td>1</td>'; extraRow += '<td>' + formatMoney(extraPrice) + '</td>'; extraRow += '<td>' + formatMoney(extraPrice) + '</td>'; extraRow += '</tr>'; rows += extraRow;
+    }
 
-        // 4. SIMPAN TEMPAHAN
-        async function submitTempahan() {
-            const custId = document.getElementById('cust-select').value;
-            const carpetData = document.getElementById('carpet-select').value;
-            const qty = parseInt(document.getElementById('qty-input').value);
+    var html = '';
+    html += '<div class="card print-area">'; html += '<div class="invoice-preview" id="invoice_pdf_content">';
+    html += '<div class="invoice-head">';
+    html += '<div style="display:flex;align-items:center;gap:16px;">';
+    html += '<img src="' + CONFIG.LOGO_URL + '" alt="Logo" style="height:60px;object-fit:contain;" onerror="this.style.display=\'none\'">';
+    html += '<div><div class="invoice-title">INVOIS / RESIT</div></div>'; // TIADA "MYCARPET PRO" DI TAJUK INVOIS
+    html += '</div>';
+    html += '<div style="text-align:right;">';
+    html += '<div style="font-size:22px;font-weight:700;">INVOIS</div>';
+    html += '<div><strong>' + escapeHtml(inv) + '</strong></div>';
+    html += '<div class="muted">Tarikh: ' + escapeHtml(formatDateMY(tarikh)) + '</div>'; // TIADA MASA PADA TARIKH
+    html += '<div class="mt-16"><span class="status-badge ' + statusClass + '">' + statusText + '</span></div>';
+    html += '</div>'; html += '</div>';
+    html += '<div class="row">';
+    html += '<div class="col"><strong>PELANGGAN</strong><br>' + escapeHtml(nama) + '<br>' + escapeHtml(telefon) + '<br>' + escapeHtml(alamat) + '<br>' + escapeHtml(daerah) + '</div>';
+    html += '<div class="col"><strong>STATUS BAYARAN</strong><br>Jumlah: <strong>' + formatMoney(total) + '</strong><br>Deposit: <strong>' + formatMoney(deposit) + '</strong><br>Baki: <strong style="color:' + (isPaid ? 'var(--green)' : 'var(--orange)') + ';">' + formatMoney(baki) + '</strong></div>';
+    html += '</div>';
+    html += '<table class="invoice-table">'; html += '<thead><tr><th>No.</th><th>Perincian</th><th>Qty</th><th>Harga</th><th>Jumlah</th></tr></thead>'; html += '<tbody>' + rows + '</tbody>'; html += '</table>';
+    html += '<div class="invoice-total">'; html += '<div><span>Sub Jumlah</span><strong>' + formatMoney(subtotal) + '</strong></div>';
+    if (extraPrice > 0) html += '<div><span>Servis Tambahan</span><strong>' + formatMoney(extraPrice) + '</strong></div>';
+    html += '<div><span>Jumlah Keseluruhan</span><strong>' + formatMoney(total) + '</strong></div>'; html += '<div><span>Deposit</span><strong>' + formatMoney(deposit) + '</strong></div>';
+    html += '<div class="grand"><span>BAKI</span><strong style="color:' + (isPaid ? 'var(--green)' : 'var(--orange)') + ';">' + formatMoney(baki) + '</strong></div>';
+    html += '</div>'; html += '<div style="margin-top:35px;padding-top:15px;border-top:1px solid #ddd;text-align:center;font-size:12px;color:#777;">Terima kasih menggunakan perkhidmatan kami.</div>';
+    html += '</div>'; html += '</div>';
+    container.innerHTML = html;
+}
 
-            if(!custId || !carpetData || qty < 1) return alert("Sila lengkapi semua ruangan!");
-            
-            const item = JSON.parse(carpetData);
-            const items = [{ kod: item['KOD'], jenis: item['JENIS CARPET'], harga: parseFloat(document.getElementById('price-display').value), qty: qty }];
+function downloadInvoicePDF() {
+    const inv = document.getElementById('invoiceSelect').value;
+    if (!inv) return alert('Pilih invoice dahulu.');
+    renderInvoice(); // Pastikan render terkini
+    const element = document.getElementById('invoice_pdf_content');
+    if (!element) return alert('Ralat: Elemen invoice tidak dijumpai.');
+    
+    // Gunakan html2pdf untuk jana PDF sebenar
+    const opt = {
+        margin: 10,
+        filename: `Invoice_${inv}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+}
 
-            // Hantar ke GAS
-            const response = await fetch(GAS_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: "createOrder", customer: { id: custId }, items: items })
-            });
-            const result = await response.json();
-            if(result.success) {
-                alert(`Tempahan Berjaya! No Invois: ${result.invoice}`);
-                location.reload();
-            } else {
-                alert("Ralat: " + result.message);
-            }
-        }
+// ============================================================
+// 7. KATALOG HARGA
+// ============================================================
+function renderHargaTable() {
+    const tbody = document.getElementById('hargaTableBody'); tbody.innerHTML = '';
+    if (!STATE.senaraiHarga.length) { tbody.innerHTML = '<tr><td colspan="7" class="text-center muted">Tiada data harga.</td></tr>'; return; }
+    STATE.senaraiHarga.forEach(p => {
+        const kod = getField(p, ['KOD'], ''); const jenis = getField(p, ['JENIS CARPET'], '');
+        const lebar = getNumber(getField(p, ['LEBAR'], 0)); const panjang = getNumber(getField(p, ['PANJANG'], 0));
+        const hargaSqft = getNumber(getField(p, ['HARGA_SQFT'], getField(p, ['HARGA OPEN'], 0)));
+        const luas = lebar * panjang; const harga = luas * hargaSqft;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><strong>${escapeHtml(kod)}</strong></td><td>${escapeHtml(jenis)}</td><td>${lebar}</td><td>${panjang}</td><td>${luas}</td><td>${formatMoney(hargaSqft)}</td><td>${formatMoney(harga)}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+async function kemaskiniHargaPukal() {
+    const kod = document.getElementById('hargaKodSelect').value; const hargaSqft = getNumber(document.getElementById('hargaSqftInput').value);
+    if (hargaSqft <= 0) { alert('Sila masukkan harga per SQFT yang sah (lebih dari 0).'); return; }
+    if (!confirm('Anda akan kemaskini SEMUA rekod dengan kod "' + kod + '" kepada harga per SQFT RM' + hargaSqft.toFixed(2) + '. Teruskan?')) return;
+    try { await postData({ action: 'updatePriceBatch', kod: kod, hargaSqft: hargaSqft }); alert('Harga untuk semua kod "' + kod + '" berjaya dikemas kini.'); document.getElementById('hargaSqftInput').value = ''; await fetchData(); renderHargaTable(); }
+    catch(e) { alert('Gagal kemas kini harga.'); }
+}
 
-        // 5. RENDER KATALOG
-        function renderKatalog() {
-            const tbody = document.getElementById('katalog-body');
-            tbody.innerHTML = '';
-            globalData.senaraiHarga.forEach(item => {
-                const row = `<tr>
-                    <td>${item['KOD']}</td>
-                    <td>${item['JENIS CARPET']}</td>
-                    <td>${item['LEBAR']}</td>
-                    <td>${item['PANJANG']}</td>
-                    <td>RM ${item['HARGA_SQFT'].toFixed(2)}</td>
-                    <td>RM ${(item['LEBAR'] * item['PANJANG'] * item['HARGA_SQFT']).toFixed(2)}</td>
-                </tr>`;
-                tbody.innerHTML += row;
-            });
-        }
+// ============================================================
+// 8. BARCODE (Label QR Tepat mengikut spesifikasi anda)
+// ============================================================
+function populateBarcodeDropdown() {
+    const sel = document.getElementById('barcodeInvoiceSelect'); const cur = sel.value;
+    sel.innerHTML = '<option value="">-- Pilih --</option>';
+    const invs = new Set(); STATE.karpet.forEach(k => { const inv = String(getField(k, ['INV NO','INV_NO','NO INVOIS'])).trim(); if (inv) invs.add(inv); });
+    invs.forEach(inv => {
+        const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) || {};
+        const cust = STATE.pelanggan.find(c => String(getField(c,['CUSTOMER ID','CUSTOMER_ID'])).trim() === String(getField(order,['CUSTOMER ID','CUSTOMER_ID'])).trim()) || {};
+        const opt = document.createElement('option'); opt.value = inv;
+        opt.textContent = `${inv} - ${getField(cust,['NAMA'],'')} - ${getField(cust,['ALAMAT'],'')}`;
+        sel.appendChild(opt);
+    });
+    if (cur && [...sel.options].some(o=>o.value===cur)) sel.value = cur;
+}
+function generateBarcodes() {
+    const container = document.getElementById('barcodeContainer'); container.innerHTML = '';
+    const inv = document.getElementById('barcodeInvoiceSelect').value;
+    if (!inv) { container.innerHTML = '<p class="muted">Sila pilih invois.</p>'; return; }
+    const items = STATE.karpet.filter(k => normalize(getField(k, ['INV NO','INV_NO','NO INVOIS'])) === normalize(inv));
+    if (!items.length) { container.innerHTML = '<p class="muted">Tiada karpet untuk invois ini.</p>'; return; }
+    const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) || {};
+    const cust = STATE.pelanggan.find(c => String(getField(c,['CUSTOMER ID','CUSTOMER_ID'])).trim() === String(getField(order,['CUSTOMER ID','CUSTOMER_ID'])).trim()) || {};
+    const alamat = getField(cust, ['ALAMAT'], ''); const telefon = getField(cust, ['TELEFON','NO TELEFON'], '');
+    items.forEach(k => {
+        const qr = String(getField(k, ['QR ID','QR_ID'])).trim(); if (!qr) return;
+        const div = document.createElement('div'); div.className = 'qr-item';
+        const canvas = document.createElement('div'); canvas.id = 'qr_'+qr.replace(/[^a-zA-Z0-9]/g,'_'); div.appendChild(canvas);
+        // Label QR Tepat (MYCARPET PRO v2.0, INV, QR ID, KDD, CUS, TEL)
+        const label = document.createElement('div'); label.className = 'qr-label';
+        label.textContent = 'MYCARPET PRO v2.0';
+        div.appendChild(label);
+        const infoDiv = document.createElement('div'); infoDiv.style.cssText = 'font-size:10px;text-align:center;margin-top:2px;';
+        infoDiv.innerHTML = `INV: ${inv}<br>QR ID: ${qr}`;
+        div.appendChild(infoDiv);
+        // Tambah kawasan untuk KDD, CUS, TEL di bawah label
+        const footerDiv = document.createElement('div'); footerDiv.style.cssText = 'font-size:9px;color:#444;margin-top:2px;';
+        const kodKarpet = getField(k, ['KOD'], '');
+        footerDiv.textContent = `KDD: ${kodKarpet} | CUS: ${getField(cust,['CUSTOMER ID','CUSTOMER_ID'],'')} | TEL: ${telefon}`;
+        div.appendChild(footerDiv);
+        container.appendChild(div);
+        setTimeout(function() { try { new QRCode(canvas, { text: 'QR ID: ' + qr + '\nAlamat: ' + alamat + '\nTelefon: ' + telefon, width: 140, height: 140, colorDark: "#000", colorLight: "#fff", correctLevel: QRCode.CorrectLevel.H }); } catch(e) { canvas.textContent = 'QR Error'; console.error(e); } }, 100);
+    });
+}
+function previewBarcodePrint() {
+    const inv = document.getElementById('barcodeInvoiceSelect').value; if (!inv) { alert('Sila pilih invois dahulu.'); return; }
+    const printArea = document.getElementById('barcodePrintArea'); printArea.innerHTML = ''; printArea.classList.add('active');
+    const items = STATE.karpet.filter(k => normalize(getField(k, ['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)); if (!items.length) { printArea.innerHTML = '<p class="muted">Tiada karpet untuk invois ini.</p>'; return; }
+    const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) || {};
+    const cust = STATE.pelanggan.find(c => String(getField(c,['CUSTOMER ID','CUSTOMER_ID'])).trim() === String(getField(order,['CUSTOMER ID','CUSTOMER_ID'])).trim()) || {};
+    const alamat = getField(cust, ['ALAMAT'], ''); const telefon = getField(cust, ['TELEFON','NO TELEFON'], '');
+    var grid = document.createElement('div'); grid.className = 'barcode-print-grid'; grid.id = 'barcodePrintGrid';
+    items.forEach(function(k) {
+        const qr = String(getField(k, ['QR ID','QR_ID'])).trim(); if (!qr) return;
+        var itemDiv = document.createElement('div'); itemDiv.className = 'barcode-print-item';
+        var canvasDiv = document.createElement('div'); canvasDiv.id = 'print_qr_' + qr.replace(/[^a-zA-Z0-9]/g,'_'); itemDiv.appendChild(canvasDiv);
+        var label = document.createElement('div'); label.className = 'label';
+        // Label dalam cetakan teks penuh
+        label.textContent = `MYCARPET PRO v2.0\nINV: ${inv}\nQR ID: ${qr}\nKDD: ${getField(k,['KOD'],'')} | CUS: ${getField(cust,['CUSTOMER ID','CUSTOMER_ID'],'')} | TEL: ${telefon}`;
+        itemDiv.appendChild(label); grid.appendChild(itemDiv);
+        setTimeout(function() { try { new QRCode(canvasDiv, { text: 'QR ID: ' + qr + '\nAlamat: ' + alamat + '\nTelefon: ' + telefon, width: 80, height: 80, colorDark: "#000", colorLight: "#fff", correctLevel: QRCode.CorrectLevel.H }); } catch(e) { canvasDiv.textContent = 'QR Error'; console.error(e); } }, 100);
+    });
+    printArea.appendChild(grid); printArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function printBarcodes() {
+    const inv = document.getElementById('barcodeInvoiceSelect').value; if (!inv) { alert('Sila pilih invois dahulu.'); return; }
+    previewBarcodePrint(); setTimeout(function() { window.print(); }, 500);
+}
 
-        // 6. GENERATE INVOICE PREVIEW & PDF
-        function renderInvoicePreview() {
-            const invNo = document.getElementById('invoice-select').value;
-            if(!invNo) return document.getElementById('invoice-preview-area').innerHTML = '';
-            
-            const tempahan = globalData.tempahan.find(t => t['INV NO'] === invNo);
-            const cust = globalData.pelanggan.find(p => p['CUSTOMER ID'] === tempahan['CUSTOMER ID']);
-            const karpets = globalData.karpet.filter(k => k['INV NO'] === invNo);
-            const payments = globalData.payment.filter(p => p['INV NO'] === invNo);
-            const totalBayaran = payments.reduce((sum, p) => sum + p['AMAUN DIBAYAR'], 0);
-            const subTotal = karpets.reduce((sum, k) => sum + k['HARGA'], 0);
-            const jumlahBersih = subTotal - totalBayaran;
-            const status = jumlahBersih <= 0 ? "PAID" : "PENDING";
+// ============================================================
+// 9. KEWANGAN
+// ============================================================
+function renderLejar() {
+    const tbody = document.getElementById('lejarBody'); tbody.innerHTML = '';
+    const all = [...STATE.expenses]; STATE.payment.forEach(p => { all.push({ tarikh: getField(p, ['TARIKH','DATE'], getToday()), penerangan: 'Bayaran invois ' + getField(p, ['INV NO','INV_NO','NO INVOIS'], ''), jenis: 'Pendapatan', jumlah: getNumber(getField(p, ['AMAUN DIBAYAR','AMOUNT'])) }); });
+    all.sort((a,b) => (a.tarikh || '').localeCompare(b.tarikh || ''));
+    if (!all.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center muted">Tiada rekod</td></tr>'; return; }
+    all.slice(-20).reverse().forEach(item => {
+        const tr = document.createElement('tr'); const jenis = getField(item, ['jenis','JENIS'], 'Perbelanjaan'); const jumlah = getNumber(getField(item, ['jumlah','JUMLAH','AMOUNT']));
+        tr.innerHTML = `<td>${escapeHtml(formatDateMY(getField(item, ['tarikh','TARIKH','DATE'], '-')))}</td><td>${escapeHtml(getField(item, ['penerangan','PENERANGAN','DESC'], '-'))}</td><td><span class="badge ${jenis==='Pendapatan'?'badge-selesai':'badge-proses'}">${escapeHtml(jenis)}</span></td><td>${formatMoney(jumlah)}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+async function tambahPerbelanjaan() {
+    const desc = document.getElementById('expDesc').value.trim(); const amount = getNumber(document.getElementById('expAmount').value); const date = document.getElementById('expDate').value || getToday();
+    if (!desc || amount <= 0) return alert('Sila isi penerangan dan jumlah yang sah.');
+    await postData({ action: 'addExpense', description: desc, amount, date }); alert('Perbelanjaan direkodkan.');
+    document.getElementById('expDesc').value = ''; document.getElementById('expAmount').value = ''; await fetchData();
+}
 
-            // Bina HTML Invois (Mengikut design asal)
-            let html = `
-            <div id="invoice-to-print" class="invoice-box">
-                <div class="inv-header">
-                    <div>
-                        <h4>WESTBERRY ENTERPRISE</h4>
-                        <small>LOT 52 JALAN PERUSAHAAN, KG SIAM,<br>PAYA BESAR 09600 LUNAS KEDAH.<br>TEL: 017-4050336</small>
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="inv-title">INVOICE</div>
-                        <div class="inv-info-box mt-2">
-                            <div><b>INVOICE NO</b> ${invNo}</div>
-                            <div><b>DATE</b> ${new Date().toISOString().split('T')[0]}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="inv-banner">INVOICE TO</div>
-                <div style="margin-top: 10px; position: relative;">
-                    <b>${cust['NAMA']} (${cust['CUSTOMER ID']})</b><br>
-                    Alamat: ${cust['ALAMAT']}<br>
-                    No. Telefon: ${cust['TELEFON']}
-                    <div class="inv-status-badge ${status === 'PAID' ? 'inv-status-paid' : ''}">${status}</div>
-                </div>
-                <table class="inv-table">
-                    <thead><tr><th>BIL</th><th>KETERANGAN SERVIS / JENIS CARPET</th><th>UNIT</th><th>HARGA SEUNIT (RM)</th><th>TOTAL (RM)</th></tr></thead>
-                    <tbody>`;
-            karpets.forEach((k, i) => {
-                html += `<tr><td>${i+1}</td><td>${k['JENIS']} [QR ID: ${k['QR ID']}]</td><td>1</td><td>${k['HARGA'].toFixed(2)}</td><td>${k['HARGA'].toFixed(2)}</td></tr>`;
-            });
-            html += `</tbody></table>
-                <div style="overflow: hidden; margin-top: 10px;">
-                    <table class="inv-summary">
-                        <tr><td><b>SUB TOTAL</b></td><td>RM ${subTotal.toFixed(2)}</td></tr>
-                        <tr><td><b>DEPOSIT</b></td><td>RM ${totalBayaran.toFixed(2)}</td></tr>
-                        <tr style="background:#f5f5f5;"><td><b>JUMLAH BERSIH</b></td><td>RM ${jumlahBersih.toFixed(2)}</td></tr>
-                    </table>
-                </div>
-                <div style="margin-top: 60px; display: flex; justify-content: space-between;">
-                    <div>
-                        <b>UNTUK PEMBAYARAN:</b><br>
-                        <b>MAYBANK-MATI-UR REHMAN</b><br>
-                        <span style="color: #b92b27; font-weight: bold;">15-203-142-4070</span>
-                    </div>
-                    <div style="text-align: center;">
-                        DISEDIAKAN OLEH / COP:<br>
-                        <img src="https://raw.githubusercontent.com/Mrehman84/MYCARPET_PRO/main/tandatangan.png" style="height:40px; width:auto; margin: 5px 0;"><br>
-                        <div style="border-top: 1px solid #000; padding-top: 3px;">( MYCARPETPRO.V2 MANAGEMENT )</div>
-                    </div>
-                </div>
-                <div style="margin-top: 30px; font-size: 10px;">
-                    <b>TERMA & SYARAT PEMBAYARAN:</b><br>
-                    1. Sila jelaskan baki bayaran penuh semasa penghantaran atau pengambilan karpet dilakukan.<br>
-                    2. Sila sertakan resit/bukti transaksi Online Transfer kepada pihak kami untuk pengesahan baki.<br>
-                    3. Hubungi kami di talian 017-4050336 atau layari media sosial kami @mycarpetpro untuk sebarang maklum balas.
-                    <div class="inv-footer-msg">
-                        Thank you for your business! We look forward to serving you again.<br>
-                        ~~~ Terima kasih kerana memilih MYCARPET PRO! Sokongan Anda amat kami hargai ~~~
-                    </div>
-                </div>
-            </div>`;
-            document.getElementById('invoice-preview-area').innerHTML = html;
-        }
-
-        function generatePDF() {
-            const element = document.getElementById('invoice-to-print');
-            if(!element) return alert("Sila pilih Invois terlebih dahulu!");
-            const opt = { margin: 10, filename: `Invoice_${document.getElementById('invoice-select').value}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-            html2pdf().set(opt).from(element).save();
-        }
-
-        // 7. GENERATE BARCODE (QR) STICKERS
-        function renderBarcodePreview() {
-            const invNo = document.getElementById('barcode-select').value;
-            if(!invNo) return document.getElementById('barcode-preview-area').innerHTML = '';
-            
-            const tempahan = globalData.tempahan.find(t => t['INV NO'] === invNo);
-            const cust = globalData.pelanggan.find(p => p['CUSTOMER ID'] === tempahan['CUSTOMER ID']);
-            const karpets = globalData.karpet.filter(k => k['INV NO'] === invNo);
-            
-            let html = `<div id="sticker-print-area">`;
-            karpets.forEach(k => {
-                const qrId = k['QR ID'];
-                const kod = k['KOD'];
-                const cusId = cust['CUSTOMER ID'];
-                const tel = cust['TELEFON'];
-                
-                html += `
-                <div class="qr-sticker">
-                    <div class="header">MYCARPET PRO v2.0</div>
-                    <div class="inv">INV: ${invNo}</div>
-                    <div class="barcode-zone"><canvas id="qr-${qrId}"></canvas></div>
-                    <div class="id-text">QR ID: ${qrId}</div>
-                    <div class="footer">KDD: ${kod} | CUS: ${cusId} | TEL: ${tel}</div>
-                </div>`;
-            });
-            html += `</div>`;
-            document.getElementById('barcode-preview-area').innerHTML = html;
-
-            // Generate QR Codes after DOM update
-            setTimeout(() => {
-                karpets.forEach(k => {
-                    const canvas = document.getElementById(`qr-${k['QR ID']}`);
-                    if(canvas) QRCode.toCanvas(canvas, k['QR ID'], { width: 80 });
-                });
-            }, 100);
-        }
-
-        function printBarcodes() {
-            const printContents = document.getElementById('sticker-print-area').innerHTML;
-            const win = window.open('', '', 'height=600,width=800');
-            win.document.write('<html><head><title>Print QR Stickers</title>');
-            win.document.write('<style>.qr-sticker { width: 40mm; height: 30mm; border: 1px dashed #000; padding: 2mm; text-align: center; box-sizing: border-box; display: inline-block; margin: 2px; page-break-after: always; } .header { font-size: 6px; font-weight: bold; } .inv { font-size: 7px; font-weight: bold; } .barcode-zone canvas { width: 100%; height: 11mm; } .id-text { font-size: 5.5px; font-weight: bold; font-family: monospace; } .footer { font-size: 5px; border-top: 0.5px solid #000; padding-top: 1px; font-weight: bold; } @page { size: 40mm 30mm; margin: 0; } .qr-sticker { border: none !important; }</style>');
-            win.document.write('</head><body>');
-            win.document.write(printContents);
-            win.document.write('<script>window.print();window.close();<' + '/script>');
-            win.document.write('</body></html>');
-            win.document.close();
-            win.focus();
-        }
-
-        // INIT
-        window.onload = loadData;
-    </script>
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    $$('.menu-item').forEach(el => { el.addEventListener('click', function() { switchTab(this.dataset.tab); }); });
+    $$('input[name="custType"]').forEach(el => el.addEventListener('change', toggleCustType));
+    document.getElementById('searchBox').addEventListener('input', executeGlobalSearch);
+    document.getElementById('trackingInvoiceSelect').addEventListener('change', executeGlobalSearch);
+    document.getElementById('extraServiceName').addEventListener('input', renderInvoice);
+    document.getElementById('extraServicePrice').addEventListener('input', renderInvoice);
+    document.getElementById('paymentInvoiceSelect').addEventListener('change', loadPaymentData);
+    document.getElementById('barcodeInvoiceSelect').addEventListener('change', generateBarcodes);
+    const tjTarikh = document.getElementById('tjTarikh'); if (tjTarikh) tjTarikh.value = getToday();
+    fetchData();
+});
+window.onerror = function(msg, src, line, col, err) { console.error('Global error:', msg, err); return false; };
+window.addEventListener('unhandledrejection', e => { console.error('Unhandled rejection:', e.reason); e.preventDefault(); });
+console.log('MYCARPET PRO v2.0 (HTML) loaded.');
+</script>
 </body>
 </html>
