@@ -418,26 +418,21 @@ bersihkanSelesaiDihantar();
         });
         
       // ======= PADAMKAN BARIS INI (Baris 419 - 433) =======
-if ( typeof updateCheckedCounter === "function") updateCheckedCounter();
-} catch ( error) {
-console. error("Ralat dalam executeGlobalSearch:", error);
-} finally {
-// Pelindung Utama: Memaksa loading screen ditutup jika skrip selesai diproses
-const loader = document. getElementById('loadingOverlay');
-if ( loader) loader. style. display = 'none';
-}
-}
-};
-// ====================================================
+        }); // Penutup untuk filtered.reverse().forEach
 
+        if (typeof updateCheckedCounter === "function") updateCheckedCounter();
+
+    } catch (error) {
+        console.error("Ralat dalam executeGlobalSearch:", error);
     } finally {
-        // Pelindung Utama: Memaksa loading screen ditutup jika skrip selesai diproses
+        // Ini akan menutup tirai bulatan loading dengan paksa
         const loader = document.getElementById('loadingOverlay');
         if (loader) loader.style.display = 'none';
     }
-}
+} // Penutup sebenar fungsi executeGlobalSearch
 
-    };
+function toggleSelectAllItems(master) { // Fungsi seterusnya sedia ada anda
+
 
     // MEMBINA STRUKTUR PENEMBUS BROWSER (JSONP INJECTION)
     const scriptElement = document.createElement('script');
