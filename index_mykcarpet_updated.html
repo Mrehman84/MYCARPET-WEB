@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYCARPET PRO v2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--primary:#ff4b4b;--dark:#1e1e2f;--bg:#f6f8fb;--text:#2d3748;--muted:#718096;--border:#e2e8f0;--success:#2ecc71;--warning:#f1c40f;--info:#3498db;--radius:10px;--shadow:0 4px 14px rgba(0,0,0,.07);--sidebar:260px}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}button,input,select{font:inherit}.loading{position:fixed;inset:0;background:rgba(255,255,255,.88);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column}.spinner{width:48px;height:48px;border:5px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}aside{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar);background:var(--dark);color:#fff;z-index:100}.brand{padding:24px;font-size:20px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1)}.brand span{color:var(--primary)}nav{padding:16px 12px}.menu{padding:13px 15px;border-radius:10px;color:#a0aec0;cursor:pointer;margin-bottom:6px}.menu:hover,.menu.active{background:var(--primary);color:#fff}.menu i{width:25px}main{margin-left:var(--sidebar);padding:32px;max-width:1600px}.tab{display:none}.tab.active{display:block}header{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:24px}h1{margin:0 0 5px;font-size:28px}h2,h3{margin-top:0}.sub{color:var(--muted)}.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:20px;box-shadow:var(--shadow)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}.metric{background:#fff;border:1px solid var(--border);border-left:5px solid var(--primary);border-radius:10px;padding:20px;box-shadow:var(--shadow)}.metric h3{font-size:13px;color:var(--muted);text-transform:uppercase}.metric p{font-size:28px;font-weight:700;margin:8px 0 0}.row{display:flex;gap:16px;flex-wrap:wrap}.col{flex:1;min-width:220px}.group{margin-bottom:16px}.group label{display:block;font-weight:600;font-size:14px;margin-bottom:7px}.input,.select{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;background:#fff}.input:focus,.select:focus{outline:none;border-color:var(--primary)}.btn{border:0;border-radius:9px;padding:11px 17px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:8px}.primary{background:var(--primary);color:#fff}.secondary{background:#e8edf3;color:var(--text)}.success{background:var(--success);color:#fff}.danger{background:#e53e3e;color:#fff}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:11px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}.badge{display:inline-block;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:700}.proses{background:#fff3cd;color:#856404}.cuci{background:#e8f4ff;color:#21618c}.ready{background:#e6fffa;color:#276749}.selesai{background:#d9f7e5;color:#21643a}.item-row{border:1px solid var(--border);padding:15px;border-radius:10px;margin-bottom:12px;background:#fafbfc}.price{font-weight:700;color:#b42318}.notice{padding:10px 13px;border-radius:9px;background:#eef6ff;margin-top:8px;font-size:13px}.error{color:#b42318;background:#fff1f1;padding:12px;border-radius:9px}.success-msg{color:#166534;background:#ecfdf5;padding:12px;border-radius:9px}.empty{text-align:center;color:var(--muted);padding:25px}.actions{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:900px){aside{position:relative;width:100%;height:auto}.brand{padding:15px}nav{display:flex;overflow:auto;gap:5px}.menu{white-space:nowrap}main{margin-left:0;padding:16px}}
+</style>
+</head>
+<body>
+<div id="loading" class="loading"><div class="spinner"></div><p>Memuatkan data...</p></div>
+<aside>
+  <div class="brand"><i class="fa-solid fa-rug"></i> MYCARPET<span>PRO</span></div>
+  <nav>
+    <div class="menu active" onclick="switchTab('dashboard',this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
+    <div class="menu" onclick="switchTab('tempahan',this)"><i class="fa-solid fa-file-invoice"></i> Tempahan Baru</div>
+    <div class="menu" onclick="switchTab('tracking',this)"><i class="fa-solid fa-qrcode"></i> Scan & Tracking QR</div>
+  </nav>
+</aside>
+<main>
+<section id="dashboard" class="tab active">
+<header><div><h1>Dashboard Operasi</h1><div class="sub">Status cucian karpet masa nyata</div></div><button class="btn secondary" onclick="fetchDataDariAPI()"><i class="fa-solid fa-rotate"></i> Refresh</button></header>
+<div class="grid" style="margin-bottom:20px"><div class="metric"><h3>Dalam Proses</h3><p id="countProses">0</p></div><div class="metric"><h3>Dicuci / Pengeringan</h3><p id="countCuci">0</p></div><div class="metric"><h3>Ready To Deliver</h3><p id="countReady">0</p></div><div class="metric"><h3>Selesai Dihantar</h3><p id="countSelesai">0</p></div></div>
+<div class="card"><h3>Aktiviti Karpet Terkini</h3><div class="table-wrap"><table class="table"><thead><tr><th>QR ID</th><th>Invois</th><th>Jenis</th><th>Harga</th><th>Tarikh</th><th>Status</th></tr></thead><tbody id="dashboardTableBody"></tbody></table></div></div>
+</section>
+<section id="tempahan" class="tab">
+<header><div><h1>Tempahan Baru</h1><div class="sub">Daftar pelanggan dan karpet</div></div></header>
+<div class="card"><h3>1. Maklumat Pelanggan</h3><div class="group"><label>Jenis Pelanggan</label><label style="display:inline-block;margin-right:18px;font-weight:500"><input type="radio" name="custType" value="lama" checked onchange="toggleCustomerType()"> Sedia Ada</label><label style="display:inline-block;font-weight:500"><input type="radio" name="custType" value="baru" onchange="toggleCustomerType()"> Pelanggan Baru</label></div>
+<div id="secCustLama" class="group"><label>Pilih Pelanggan</label><select id="optPelanggan" class="select" onchange="loadCustomerDetails()"><option value="">-- Pilih --</option></select></div>
+<div id="secCustBaru" style="display:none"><div class="row"><div class="col group"><label>Nama</label><input id="custNama" class="input" placeholder="Nama pelanggan"></div><div class="col group"><label>No. Telefon</label><input id="custTel" class="input" placeholder="6012..." inputmode="tel"></div></div><div class="row"><div class="col group"><label>Alamat</label><input id="custAlamat" class="input" placeholder="Alamat"></div><div class="col group"><label>Daerah</label><input id="custDaerah" class="input" placeholder="Kulim"></div></div></div>
+</div>
+<div class="card"><h3>2. Perincian Karpet</h3><div class="notice">Pilih kod seperti <b>CK 7X10</b>. Sistem akan mengambil <b>JENIS CARPET</b> dan <b>HARGA OPEN</b> terus daripada tab SENARAI_HARGA.</div><div id="carpetItemsContainer" style="margin-top:15px"></div><div class="actions"><button class="btn secondary" onclick="addCarpetRow()"><i class="fa-solid fa-plus"></i> Tambah Baris</button></div><div style="margin-top:20px;text-align:right;border-top:1px dashed var(--border);padding-top:18px"><b>Jumlah: <span id="grandTotalLabel" style="font-size:24px;color:var(--primary)">RM 0.00</span></b><br><button class="btn success" style="margin-top:12px" onclick="simpanTempahanKeSheets()"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan Tempahan</button></div></div>
+</section>
+<section id="tracking" class="tab">
+<header><div><h1>Scan & Tracking QR</h1><div class="sub">Cari QR / invois dan kemas kini status</div></div></header>
+<div class="card">
+  <div class="row">
+    <div class="col group">
+      <label>Cari No. Invois / Alamat</label>
+      <select id="searchOrderSelect" class="select" onchange="executeGlobalSearch()">
+        <option value="">-- Semua Rekod Aktif --</option>
+      </select>
+    </div>
+    <div style="width:260px" class="group">
+      <label>Cari QR / teks</label>
+      <input id="searchBox" class="input" oninput="executeGlobalSearch()" placeholder="Contoh: INV1001-2">
+    </div>
+  </div>
+  <div class="row" style="align-items:end">
+    <div class="col group">
+      <label>Status kemas kini</label>
+      <select id="batchStatusOpt" class="select">
+        <option>DALAM PROSES</option>
+        <option>PENGERINGAN</option>
+        <option>READY TO DELIVER</option>
+      </select>
+    </div>
+    <div class="group">
+      <button class="btn primary" onclick="submitBatchUpdate()"><i class="fa-solid fa-check-double"></i> Kemas Kini Dipilih</button>
+    </div>
+  </div>
+  <div id="checkedCountLabel" class="sub" style="margin-bottom:10px">0 item dipilih</div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="masterCheck" onchange="toggleSelectAllItems(this)"></th>
+          <th>QR / Invois</th>
+          <th>Pelanggan / Alamat</th>
+          <th>Jenis</th>
+          <th>Harga</th>
+          <th>Status</th>
+          <th>Tindakan</th>
+        </tr>
+      </thead>
+      <tbody id="trackingTableBody"></tbody>
+    </table>
+  </div>
+</div>
+</section>
+</main>
+<script>
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxG1fDrDHW_IRIlUEO_cxK9pkeI9xgddeUVgNq6vAlmewwp9LmwU0p8lvhElhi_-EUW/exec";
+let DATA_MASTER = {senaraiHarga:[],pelanggan:[],tempahan:[],karpet:[]};
+let carpetRowCount = 0;
+
+function norm(v){return String(v ?? '').replace(/\u00a0/g,' ').trim().replace(/\s+/g,' ').toUpperCase();}
+function money(v){let n=Number(String(v ?? '').replace(/,/g,''));return Number.isFinite(n)?n:0;}
+function showLoading(on){document.getElementById('loading').style.display=on?'flex':'none';}
+function switchTab(id,el){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.menu').forEach(x=>x.classList.remove('active'));if(el)el.classList.add('active');if(id==='tracking')executeGlobalSearch();}
+
+function fetchDataDariAPI(){
+  showLoading(true);
+  const callback='jsonp_'+Date.now()+'_'+Math.floor(Math.random()*10000);
+  const script=document.createElement('script');
+  script.id=callback;
+  let done=false;
+  const finish=()=>{if(done)return;done=true;showLoading(false);if(script.parentNode)script.parentNode.removeChild(script);try{delete window[callback];}catch(e){window[callback]=undefined;}};
+  const timer=setTimeout(()=>{finish();showError('Gagal memuat data. Semak URL Google Apps Script dan sambungan internet.');},15000);
+  window[callback]=function(response){clearTimeout(timer);try{if(!response||typeof response!=='object')throw new Error('Respons API tidak sah.');DATA_MASTER.senaraiHarga=Array.isArray(response.senaraiHarga)?response.senaraiHarga:[];DATA_MASTER.pelanggan=Array.isArray(response.pelanggan)?response.pelanggan:[];DATA_MASTER.tempahan=Array.isArray(response.tempahan)?response.tempahan:[];DATA_MASTER.karpet=Array.isArray(response.karpet)?response.karpet:[];populateCustomerDropdown();populateTrackingSearchDropdown();renderDashboardMetrics();renderDashboardTable();renderCarpetRowsAfterData();executeGlobalSearch();}catch(e){console.error(e);showError('Data diterima tetapi format API tidak betul: '+e.message);}finally{finish();}};
+  script.onerror=()=>{clearTimeout(timer);finish();showError('Tidak dapat menghubungi Google Apps Script.');};
+  script.src=GAS_API_URL+'?action=readAll&callback='+encodeURIComponent(callback)+'&_='+Date.now();
+  document.body.appendChild(script);
+}
+function showError(msg){console.error(msg);alert(msg);}
+
+function populateCustomerDropdown(){const s=document.getElementById('optPelanggan');s.innerHTML='<option value="">-- Pilih Pelanggan --</option>';DATA_MASTER.pelanggan.forEach(c=>{const o=document.createElement('option');o.value=String(c['CUSTOMER ID']??'').trim();o.textContent=`${o.value} - ${c['NAMA']??''} - ${c['ALAMAT']??''}`;s.appendChild(o);});}
+function toggleCustomerType(){const baru=document.querySelector('input[name="custType"]:checked')?.value==='baru';document.getElementById('secCustBaru').style.display=baru?'block':'none';document.getElementById('secCustLama').style.display=baru?'none':'block';if(baru)clearCustomerFormInputs();}
+function loadCustomerDetails(){const id=document.getElementById('optPelanggan').value;const c=DATA_MASTER.pelanggan.find(x=>String(x['CUSTOMER ID']).trim()===id);if(!c)return;document.getElementById('custNama').value=c['NAMA']??'';document.getElementById('custTel').value=c['TELEFON']??'';document.getElementById('custAlamat').value=c['ALAMAT']??'';document.getElementById('custDaerah').value=c['DAERAH']??'';}
+function clearCustomerFormInputs(){['custNama','custTel','custAlamat','custDaerah'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});const s=document.getElementById('optPelanggan');if(s)s.value='';}
+
+function findPriceByCode(code){const wanted=norm(code);return DATA_MASTER.senaraiHarga.find(p=>norm(p['KOD'])===wanted)||null;}
+function addCarpetRow(){
+  carpetRowCount++;const id='carpetRow_'+carpetRowCount;const row=document.createElement('div');row.className='item-row';row.id=id;
+  const label=document.createElement('div');label.className='group';label.innerHTML='<label>Kod / Jenis Karpet</label>';
+  const select=document.createElement('select');select.className='select select-kod-karpet';
+  const first=document.createElement('option');first.value='';first.textContent='-- Pilih Kod Servis --';select.appendChild(first);
+  DATA_MASTER.senaraiHarga.forEach(p=>{const code=String(p['KOD']??'').trim();if(!code)return;const o=document.createElement('option');o.value=code;o.textContent=`${code} - ${String(p['JENIS CARPET']??'').trim()}`;select.appendChild(o);});
+  label.appendChild(select);
+  const grid=document.createElement('div');grid.className='row';
+  const desc=document.createElement('div');desc.className='col group';desc.innerHTML='<label>Jenis Carpet (VLOOKUP)</label><input class="input inp-jenis" readonly>';
+  const qty=document.createElement('div');qty.style.width='110px';qty.className='group';qty.innerHTML='<label>Qty</label><input type="number" min="1" step="1" value="1" class="input inp-qty">';
+  const price=document.createElement('div');price.style.width='160px';price.className='group';price.innerHTML='<label>Harga Sehelai</label><input type="number" min="0" step="0.01" class="input inp-price" readonly>';
+  const total=document.createElement('div');total.style.width='160px';total.className='group';total.innerHTML='<label>Jumlah</label><input class="input inp-total" readonly>';
+  const del=document.createElement('div');del.className='group';del.innerHTML='<label>&nbsp;</label><button class="btn danger" type="button"><i class="fa-solid fa-trash"></i></button>';
+  del.querySelector('button').onclick=()=>{if(document.querySelectorAll('.item-row').length<=1){alert('Sekurang-kurangnya satu baris diperlukan.');return;}row.remove();calculateGrandTotal();};
+  grid.append(desc,qty,price,total,del);row.append(label,grid);document.getElementById('carpetItemsContainer').appendChild(row);
+  select.addEventListener('change',()=>lookupCarpetRow(row));qty.querySelector('input').addEventListener('input',()=>calculateRow(row));
+}
+function renderCarpetRowsAfterData(){const c=document.getElementById('carpetItemsContainer');if(!c)return;if(c.children.length===0)addCarpetRow();else c.querySelectorAll('.item-row').forEach(r=>{const s=r.querySelector('.select-kod-karpet');const current=s?.value;if(s&&current)lookupCarpetRow(r);});}
+function lookupCarpetRow(row){const s=row.querySelector('.select-kod-karpet');const rec=findPriceByCode(s.value);row.querySelector('.inp-jenis').value=rec?String(rec['JENIS CARPET']??'').trim():'';row.querySelector('.inp-price').value=rec?money(rec['HARGA OPEN']).toFixed(2):'';calculateRow(row);}
+function calculateRow(row){const p=money(row.querySelector('.inp-price').value);const q=Math.max(1,parseInt(row.querySelector('.inp-qty').value||'1',10));row.querySelector('.inp-qty').value=q;row.querySelector('.inp-total').value=(p*q).toFixed(2);calculateGrandTotal();}
+function calculateGrandTotal(){let total=0;document.querySelectorAll('.item-row').forEach(r=>{total+=money(r.querySelector('.inp-total')?.value);});document.getElementById('grandTotalLabel').textContent='RM '+total.toFixed(2);}
+
+function simpanTempahanKeSheets(){
+  const isNew=document.querySelector('input[name="custType"]:checked')?.value==='baru';
+  const customer={id:isNew?'':document.getElementById('optPelanggan').value,nama:document.getElementById('custNama').value.trim(),telefon:document.getElementById('custTel').value.trim(),alamat:document.getElementById('custAlamat').value.trim(),daerah:document.getElementById('custDaerah').value.trim()};
+  if(!customer.nama||!customer.telefon||!customer.alamat){alert('Sila lengkapkan nama, telefon dan alamat pelanggan.');return;}
+  const items=[];let valid=true;
+  document.querySelectorAll('.item-row').forEach(row=>{const code=row.querySelector('.select-kod-karpet').value;const qty=Math.max(1,parseInt(row.querySelector('.inp-qty').value||'1',10));const rec=findPriceByCode(code);if(!rec){valid=false;return;}const jenis=String(rec['JENIS CARPET']??'').trim();const harga=money(rec['HARGA OPEN']);for(let i=0;i<qty;i++)items.push({kod:code,jenis,harga,qty:1});});
+  if(!valid||items.length===0){alert('Sila pilih kod servis yang sah untuk semua baris.');return;}
+  const payload={action:'createOrder',isNewCustomer:isNew,customer,items};
+  showLoading(true);postToGAS(payload).then(()=>{alert('Tempahan berjaya dihantar. Jika GAS anda menjana QR, setiap item akan menjadi satu rekod/QR.');copyWhatsApp(customer,items);resetOrderForm();fetchDataDariAPI();switchTab('dashboard',document.querySelectorAll('.menu')[0]);}).catch(e=>{console.error(e);showError('Gagal menghantar tempahan: '+e.message);}).finally(()=>showLoading(false));
+}
+function postToGAS(payload){return fetch(GAS_API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}).then(()=>true);}
+function resetOrderForm(){document.getElementById('carpetItemsContainer').innerHTML='';carpetRowCount=0;clearCustomerFormInputs();document.querySelector('input[name="custType"][value="lama"]').checked=true;toggleCustomerType();addCarpetRow();calculateGrandTotal();}
+function copyWhatsApp(cust,items){let total=0;let list='';items.forEach((x,i)=>{total+=x.harga;list+=`${i+1}. ${x.jenis} - RM${x.harga.toFixed(2)}\n`;});const msg=`*MYCARPET PRO v2.0*\n\nAssalamualaikum ${cust.nama},\nTempahan karpet anda telah didaftarkan.\n\n${list}\n*Jumlah:* RM${total.toFixed(2)}\n\nTerima kasih.`;if(navigator.clipboard?.writeText)navigator.clipboard.writeText(msg).catch(()=>{});}
+
+function statusClass(status){const s=norm(status);if(s==='READY TO DELIVER')return'ready';if(s==='SELESAI'||s==='SELESAI DIHANTAR'||s==='DELIVERED')return'selesai';if(s==='SEDANG DICUCI'||s==='PENGERINGAN')return'cuci';return'proses';}
+function renderDashboardMetrics(){let p=0,c=0,r=0,s=0;DATA_MASTER.karpet.forEach(k=>{const st=norm(k['STATUS']);if(st==='DALAM PROSES')p++;else if(st==='SEDANG DICUCI'||st==='PENGERINGAN')c++;else if(st==='READY TO DELIVER')r++;else if(st==='SELESAI'||st==='SELESAI DIHANTAR'||st==='DELIVERED')s++;});document.getElementById('countProses').textContent=p;document.getElementById('countCuci').textContent=c;document.getElementById('countReady').textContent=r;document.getElementById('countSelesai').textContent=s;}
+function renderDashboardTable(){const body=document.getElementById('dashboardTableBody');body.innerHTML='';const rows=DATA_MASTER.karpet.slice(-10).reverse();if(!rows.length){body.innerHTML='<tr><td colspan="6" class="empty">Tiada rekod.</td></tr>';return;}rows.forEach(k=>{const tr=document.createElement('tr');const st=String(k['STATUS']??'');tr.innerHTML=`<td>${safe(k['QR ID'])}</td><td>${safe(k['INV NO'])}</td><td>${safe(k['JENIS']??k['JENIS CARPET'])}</td><td>RM ${money(k['HARGA']).toFixed(2)}</td><td>${safe(String(k['TARIKH']??'').split('T')[0]||'-')}</td><td><span class="badge ${statusClass(st)}">${safe(st||'DALAM PROSES')}</span></td>`;body.appendChild(tr);});}
+function safe(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+const SCAN_STATUS = new Set(["DALAM PROSES","PENGERINGAN","READY TO DELIVER"]);
+
+function getOrderForCarpet(carpet){
+  return DATA_MASTER.tempahan.find(
+    o => norm(o["INV NO"]) === norm(carpet["INV NO"])
+  ) || {};
+}
+
+function getCustomerForOrder(order){
+  return DATA_MASTER.pelanggan.find(
+    c => norm(c["CUSTOMER ID"]) === norm(order["CUSTOMER ID"])
+  ) || {};
+}
+
+/* Dropdown carian: No. Invois + Alamat dalam satu pilihan */
+function populateTrackingSearchDropdown(){
+  const select = document.getElementById("searchOrderSelect");
+  if(!select) return;
+
+  const current = select.value;
+  const map = new Map();
+
+  DATA_MASTER.karpet.forEach(k => {
+    const status = norm(k["STATUS"]);
+    if(!SCAN_STATUS.has(status)) return;
+
+    const inv = String(k["INV NO"] ?? "").trim();
+    if(!inv) return;
+
+    const order = getOrderForCarpet(k);
+    const cust = getCustomerForOrder(order);
+    const alamat = String(cust["ALAMAT"] ?? order["ALAMAT"] ?? "").trim();
+    const nama = String(cust["NAMA"] ?? "").trim();
+
+    if(!map.has(inv)){
+      map.set(inv, {alamat, nama});
+    } else {
+      const old = map.get(inv);
+      if(!old.alamat && alamat) old.alamat = alamat;
+      if(!old.nama && nama) old.nama = nama;
+    }
+  });
+
+  const invoices = [...map.keys()].sort((a,b) =>
+    a.localeCompare(b, undefined, {numeric:true, sensitivity:"base"})
+  );
+
+  select.innerHTML = '<option value="">-- Semua Rekod Aktif --</option>';
+
+  invoices.forEach(inv => {
+    const info = map.get(inv);
+    const option = document.createElement("option");
+    option.value = inv;
+
+    const alamat = info.alamat || "Alamat tiada";
+    const nama = info.nama ? ` | ${info.nama}` : "";
+    option.textContent = `${inv} — ${alamat}${nama}`;
+
+    select.appendChild(option);
+  });
+
+  if(invoices.includes(current)){
+    select.value = current;
+  }
+}
+
+/* Hanya paparkan 3 status aktif:
+   DALAM PROSES → PENGERINGAN → READY TO DELIVER.
+   Semua yang telah dihantar / delivered tidak dipaparkan. */
+function executeGlobalSearch(){
+  const body = document.getElementById("trackingTableBody");
+  if(!body) return;
+
+  const selectedInv = norm(
+    document.getElementById("searchOrderSelect")?.value || ""
+  );
+  const qrKeyword = norm(
+    document.getElementById("searchBox")?.value || ""
+  );
+
+  body.innerHTML = "";
+
+  const rows = DATA_MASTER.karpet.filter(k => {
+    const status = norm(k["STATUS"]);
+
+    // Tapisan utama: hanya 3 status aktif.
+    if(!SCAN_STATUS.has(status)) return false;
+
+    const inv = norm(k["INV NO"]);
+    const qr = norm(k["QR ID"]);
+
+    // Jika pilih invois + alamat dari dropdown.
+    if(selectedInv && inv !== selectedInv) return false;
+
+    // Jika masukkan QR / teks carian.
+    if(qrKeyword){
+      if(!inv.includes(qrKeyword) && !qr.includes(qrKeyword)){
+        return false;
+      }
+    }
+
+    return true;
+  }).reverse();
+
+  if(!rows.length){
+    body.innerHTML =
+      '<tr><td colspan="7" class="empty">Tiada rekod aktif ditemui. Rekod SELESAI DIHANTAR tidak dipaparkan di sini.</td></tr>';
+    updateCheckedCounter();
+    return;
+  }
+
+  rows.forEach(k => {
+    const order = getOrderForCarpet(k);
+    const cust = getCustomerForOrder(order);
+
+    const qrId = String(k["QR ID"] ?? "");
+    const invNo = String(k["INV NO"] ?? "");
+    const jenis = k["JENIS"] || k["JENIS CARPET"] || "-";
+    const harga = money(k["HARGA"]);
+    const status = norm(k["STATUS"]) || "DALAM PROSES";
+
+    const tr = document.createElement("tr");
+
+    const tdCheck = document.createElement("td");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "row-checkbox";
+    checkbox.value = qrId;
+    checkbox.addEventListener("change", updateCheckedCounter);
+    tdCheck.appendChild(checkbox);
+
+    const tdQr = document.createElement("td");
+    tdQr.innerHTML =
+      `<b>${safe(qrId)}</b><br><small>${safe(invNo)}</small>`;
+
+    const tdCustomer = document.createElement("td");
+    tdCustomer.innerHTML =
+      `${safe(cust["NAMA"] || "-")}<br><small>${safe(cust["ALAMAT"] || order["ALAMAT"] || "-")}</small>`;
+
+    const tdJenis = document.createElement("td");
+    tdJenis.textContent = jenis;
+
+    const tdHarga = document.createElement("td");
+    tdHarga.textContent = `RM ${harga.toFixed(2)}`;
+
+    const tdStatus = document.createElement("td");
+    const badge = document.createElement("span");
+    badge.className = `badge ${statusClass(status)}`;
+    badge.textContent = status;
+    tdStatus.appendChild(badge);
+
+    const tdAction = document.createElement("td");
+    const button = document.createElement("button");
+    button.className = "btn secondary";
+    button.title = "Tukar status";
+    button.innerHTML = '<i class="fa-solid fa-pen"></i>';
+    button.addEventListener("click", () => tukarStatusSingleItem(qrId));
+    tdAction.appendChild(button);
+
+    tr.append(tdCheck, tdQr, tdCustomer, tdJenis, tdHarga, tdStatus, tdAction);
+    body.appendChild(tr);
+  });
+
+  updateCheckedCounter();
+}
+
+function toggleSelectAllItems(master){
+  document.querySelectorAll(".row-checkbox").forEach(x => {
+    x.checked = master.checked;
+  });
+  updateCheckedCounter();
+}
+
+function updateCheckedCounter(){
+  const label = document.getElementById("checkedCountLabel");
+  if(label){
+    label.textContent =
+      `${document.querySelectorAll(".row-checkbox:checked").length} item dipilih`;
+  }
+}
+
+function tukarStatusSingleItem(qr){
+  const status = prompt(
+    "Masukkan status baru:\n\nDALAM PROSES\nPENGERINGAN\nREADY TO DELIVER"
+  );
+
+  if(!status) return;
+
+  const statusNormal = norm(status);
+
+  if(!SCAN_STATUS.has(statusNormal)){
+    alert("Status tidak sah. Gunakan hanya DALAM PROSES, PENGERINGAN atau READY TO DELIVER.");
+    return;
+  }
+
+  showLoading(true);
+
+  postToGAS({
+    action:"updateBatchStatus",
+    qrIds:[qr],
+    status:statusNormal
+  })
+  .then(() => {
+    alert(`Status ${qr} dikemas kini kepada ${statusNormal}.`);
+    fetchDataDariAPI();
+  })
+  .catch(e => showError(e.message))
+  .finally(() => showLoading(false));
+}
+
+function submitBatchUpdate(){
+  const ids = [...document.querySelectorAll(".row-checkbox:checked")]
+    .map(x => x.value);
+
+  if(!ids.length){
+    alert("Sila pilih sekurang-kurangnya satu karpet.");
+    return;
+  }
+
+  const status = norm(
+    document.getElementById("batchStatusOpt").value
+  );
+
+  if(!SCAN_STATUS.has(status)){
+    alert("Status tidak sah.");
+    return;
+  }
+
+  showLoading(true);
+
+  postToGAS({
+    action:"updateBatchStatus",
+    qrIds:ids,
+    status:status
+  })
+  .then(() => {
+    alert(`${ids.length} karpet berjaya dihantar untuk kemas kini kepada ${status}.`);
+
+    const master = document.getElementById("masterCheck");
+    if(master) master.checked = false;
+
+    fetchDataDariAPI();
+  })
+  .catch(e => showError(e.message))
+  .finally(() => showLoading(false));
+}
+
+window.addEventListener('DOMContentLoaded',()=>{addCarpetRow();fetchDataDariAPI();});
+</script>
+</body>
+</html>
