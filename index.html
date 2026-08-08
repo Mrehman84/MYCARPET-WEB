@@ -601,7 +601,7 @@ function addCarpetRow() {
             });
             document.getElementById('countProses').textContent = p; document.getElementById('countCuci').textContent = c; document.getElementById('countReady').textContent = r; document.getElementById('countSelesai').textContent = s;
         }
-
+executeGlobalSearch();
         function renderDashboardTable() {
             const tbody = document.getElementById('dashboardTableBody'); tbody.innerHTML = "";
             const sliceData = DATA_MASTER.karpet.slice(-10).reverse();
