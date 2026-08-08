@@ -319,26 +319,29 @@ function fetchDataDariAPI() {
 
 function executeGlobalSearch() {
     try {
-        const kw = document.getElementById('searchBox') ? document.getElementById('searchBox').value.toLowerCase().trim() : '';
-        const searchType = document.getElementById('searchType') ? document.getElementById('searchType').value : 'inv';
+        const searchBoxEl = document.getElementById('searchBox');
+        const searchTypeEl = document.getElementById('searchType');
+        
+        const kw = searchBoxEl ? searchBoxEl.value.toLowerCase().trim() : '';
+        const searchType = searchTypeEl ? searchTypeEl.value : 'inv';
         const tbody = document.getElementById('trackingTableBody');
         
         if (!tbody) return;
         tbody.innerHTML = "";
         
-        if (!DATA_MASTER || !DATA_MASTER.karpet || !Array.isArray(DATA_MASTER.karpet)) {
+        if (!window.DATA_MASTER || !window.DATA_MASTER.karpet || !Array.isArray(window.DATA_MASTER.karpet)) {
             tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center;">Menunggu memuatkan data...</td></tr>';
             return;
         }
         
-        // Menapis hanya status aktif (menyembunyikan SELESAI & SELESAI DIHANTAR)
-        let filtered = DATA_MASTER.karpet.filter(l => {
+        // 1. Logik utama: menapis karpet aktif dan menyembunyikan status selesai
+        let filtered = window.DATA_MASTER.karpet.filter(l => {
             if (!l) return false;
             const st = l.STATUS ? l.STATUS.toString().trim().toUpperCase() : "";
             if (st === "SELESAI" || st === "SELESAI DIHANTAR") return false;
             
-            const order = (DATA_MASTER.tempahan && Array.isArray(DATA_MASTER.tempahan)) ? DATA_MASTER.tempahan.find(o => String(o.INV_NO).trim() === String(l.INV_NO).trim()) : {};
-            const cust = (DATA_MASTER.pelanggan && Array.isArray(DATA_MASTER.pelanggan) && order) ? DATA_MASTER.pelanggan.find(c => String(c.CUSTOMER_ID).trim() === String(order.CUSTOMER_ID).trim()) : {};
+            const order = (window.DATA_MASTER.tempahan && Array.isArray(window.DATA_MASTER.tempahan)) ? window.DATA_MASTER.tempahan.find(o => String(o.INV_NO).trim() === String(l.INV_NO).trim()) : {};
+            const cust = (window.DATA_MASTER.pelanggan && Array.isArray(window.DATA_MASTER.pelanggan) && order) ? window.DATA_MASTER.pelanggan.find(c => String(c.CUSTOMER_ID).trim() === String(order.CUSTOMER_ID).trim()) : {};
             
             if (searchType === 'inv') {
                 return (l.INV_NO || "").toString().toLowerCase().includes(kw) || (l.QR_ID || "").toString().toLowerCase().includes(kw);
@@ -353,9 +356,10 @@ function executeGlobalSearch() {
             return;
         }
 
+        // 2. Bina baris jadual pemantauan berserta maklumat pelanggan
         filtered.reverse().forEach(k => {
-            const order = DATA_MASTER.tempahan ? DATA_MASTER.tempahan.find(o => String(o.INV_NO).trim() === String(k.INV_NO).trim()) : {};
-            const cust = DATA_MASTER.pelanggan ? DATA_MASTER.pelanggan.find(c => String(c.CUSTOMER_ID).trim() === String(order.CUSTOMER_ID).trim()) : {};
+            const order = window.DATA_MASTER.tempahan ? window.DATA_MASTER.tempahan.find(o => String(o.INV_NO).trim() === String(k.INV_NO).trim()) : {};
+            const cust = window.DATA_MASTER.pelanggan ? window.DATA_MASTER.pelanggan.find(c => String(c.CUSTOMER_ID).trim() === String(order.CUSTOMER_ID).trim()) : {};
             
             const namaPelanggan = cust.NAMA ? cust.NAMA.toString().toUpperCase() : "TIADA DATA NAMA";
             const alamatPelanggan = cust.ALAMAT ? cust.ALAMAT.toString() : "-";
@@ -377,10 +381,23 @@ function executeGlobalSearch() {
         if (typeof updateCheckedCounter === "function") updateCheckedCounter();
     } catch (error) {
         console.error("Ralat dalam executeGlobalSearch:", error);
+    } finally {
+        // Talian Keselamatan Utama: Memaksa loading screen ditutup walau apa pun yang terjadi
+        const loader = document.getElementById('loadingOverlay');
+        if (loader) loader.style.display = 'none';
     }
 }
 
-// FUNGSI BARU: Berjalan automatik di latar belakang untuk menapis jadual sewaktu data selesai dimuatkan
+// Pemerhati Latar Belakang Mandiri: Menjalankan carian sejurus selepas data sedia dimuat turun
+(function pantauDataMaster() {
+    let masaSemak = setInterval(() => {
+        if (window.DATA_MASTER && window.DATA_MASTER.karpet) {
+            executeGlobalSearch();
+            clearInterval(masaSemak);
+        }
+    }, 800);
+})();
+
 function bersihkanSelesaiDihantar() {
     let masaSemak = setInterval(() => {
         if (window.DATA_MASTER && window.DATA_MASTER.karpet) {
