@@ -611,7 +611,7 @@ function addCarpetRow() {
             });
         }
 
-   function executeGlobalSearch() {
+function executeGlobalSearch() {
     try {
         const kw = document.getElementById('searchBox') ? document.getElementById('searchBox').value.toLowerCase().trim() : '';
         const searchType = document.getElementById('searchType') ? document.getElementById('searchType').value : 'inv';
@@ -620,28 +620,61 @@ function addCarpetRow() {
         if (!tbody || !window.DATA_MASTER || !window.DATA_MASTER.karpet) return;
         tbody.innerHTML = "";
 
-        // Tapis karpet aktif dan bina baris jadual (rujuk untuk kod penuh)
+        // 1. Logik menapis karpet aktif (Sembunyikan status SELESAI & SELESAI DIHANTAR)
         let filtered = window.DATA_MASTER.karpet.filter(l => {
             if (!l) return false;
             const st = l["STATUS"] ? l["STATUS"].toString().trim().toUpperCase() : "";
             if (st === "SELESAI" || st === "SELESAI DIHANTAR") return false;
-            // Penapisan mengikut jenis carian...
-            return true;
+            
+            const order = window.DATA_MASTER.tempahan ? window.DATA_MASTER.tempahan.find(o => String(o["INV NO"]).trim() === String(l["INV NO"]).trim()) : {};
+            const cust = window.DATA_MASTER.pelanggan ? window.DATA_MASTER.pelanggan.find(c => String(c["CUSTOMER ID"]).trim() === String(order["CUSTOMER ID"]).trim()) : {};
+            
+            if (searchType === 'inv') {
+                return (l["INV NO"] || "").toString().toLowerCase().includes(kw) || (l["QR ID"] || "").toString().toLowerCase().includes(kw);
+            } else if (searchType === 'alamat') {
+                return (cust["ALAMAT"] || "").toString().toLowerCase().includes(kw);
+            }
+            return false;
         });
 
-        // Paparkan hasil carian ke dalam jadual
         if (filtered.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center; color: var(--text-muted);">Tiada hasil carian karpet yang aktif.</td></tr>';
             return;
         }
-        
+
+        // 2. Membina baris jadual fizikal di atas skrin secara dinamik
+        filtered.reverse().forEach(k => {
+            const order = window.DATA_MASTER.tempahan ? window.DATA_MASTER.tempahan.find(o => String(o["INV NO"]).trim() === String(k["INV NO"]).trim()) : {};
+            const cust = window.DATA_MASTER.pelanggan ? window.DATA_MASTER.pelanggan.find(c => String(c["CUSTOMER ID"]).trim() === String(order["CUSTOMER ID"]).trim()) : {};
+            
+            const namaPelanggan = cust["NAMA"] ? cust["NAMA"].toString().toUpperCase() : "TIADA DATA NAMA";
+            const alamatPelanggan = cust["ALAMAT"] ? cust["ALAMAT"].toString() : "-";
+            
+            let tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid var(--border-color)';
+            tr.innerHTML = `
+                <td style="padding: 12px;"><input type="checkbox" class="row-checkbox" value="${k["QR ID"]}" onclick="typeof updateCheckedCounter === 'function' && updateCheckedCounter()"></td>
+                <td style="padding: 12px;"><span style="font-weight:700; color:var(--primary-red);">${k["QR ID"]}</span><br><small>Invois: ${k["INV NO"]}</small></td>
+                <td style="padding: 12px;"><strong>${namaPelanggan}</strong><br><small>${alamatPelanggan}</small></td>
+                <td style="padding: 12px;">${k["JENIS"] || "-"}</td>
+                <td style="padding: 12px;">RM ${(parseFloat(k["HARGA"]) || 0).toFixed(2)}</td>
+                <td style="padding: 12px;"><span class="badge badge-proses" style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">${k["STATUS"] || "DALAM PROSES"}</span></td>
+                <td style="padding: 12px; text-align:center;"><button class="btn btn-secondary" style="padding:6px 10px; font-size:12px;" onclick="tukarStatusSingleItem('${k["QR ID"]}')"><i class="fa-solid fa-edit"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        if (typeof updateCheckedCounter === "function") updateCheckedCounter();
+
     } catch (error) {
         console.error("Ralat dalam executeGlobalSearch:", error);
     } finally {
+        // Pemaksa keselamatan utama untuk memastikan loading screen ditutup
         const loader = document.getElementById('loadingOverlay');
         if (loader) loader.style.display = 'none';
     }
 }
+
 
         function toggleSelectAllItems(master) { document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked); updateCheckedCounter(); }
         function updateCheckedCounter() { document.getElementById('checkedCountLabel').textContent = `${document.querySelectorAll('.row-checkbox:checked').length} item dipilih`; }
