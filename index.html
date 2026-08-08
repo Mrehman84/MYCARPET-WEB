@@ -898,7 +898,7 @@ function renderDashboardTable(){
 /* ==========================================================
    TRACKING: HANYA 3 STATUS AKTIF
    ========================================================== */
-const ACTIVE_SCAN_STATUSES = new Set(["DALAM PROSES","PENGERINGAN","READY TO DELIVER"]);
+const ACTIVE_SCAN_STATUSES = new Set(["DALAM PROSES","PENGERINGAN","READY TO DELIVER","SELESAI DIHANTAR"]);
 
 function populateTrackingInvoiceDropdown(){
     const select=document.getElementById("trackingInvoiceSelect");
