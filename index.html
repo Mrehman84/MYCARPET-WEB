@@ -690,7 +690,7 @@ function executeGlobalSearch() {
             let qrIds = []; checkboxes.forEach(cb => qrIds.push(cb.value));
             showLoading(true);
             fetch(GAS_API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "updateBatchStatus", qrIds: qrIds, status: document.getElementById('batchStatusOpt').value }) }).then(() => { alert("Kemas kini pukal berjaya!"); document.getElementById('masterCheck').checked = false; fetchDataDariAPI(); }).finally(() => showLoading(false));
-        })
+        }
     }
 
     </script>
