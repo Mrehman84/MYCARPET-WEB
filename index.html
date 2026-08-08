@@ -359,19 +359,42 @@ bersihkanSelesaiDihantar();
         
 function executeGlobalSearch() {
     try {
-        // Kod fungsi carian memproses tapisan data aktif, semakan jadual, dan pembinaan baris jadual pemantauan
         const kw = document.getElementById('searchBox') ? document.getElementById('searchBox').value.toLowerCase().trim() : '';
-        // Sila rujuk dokumen asal untuk implementasi penuh fungsi executeGlobalSearch() yang merangkumi try-catch-finally serta kemas kini paparan jadual.
-        if (typeof updateCheckedCounter === "function") updateCheckedCounter();
-    } catch (error) {
-        console.error("Ralat dalam executeGlobalSearch:", error);
-    } finally {
-        const loader = document.getElementById('loadingOverlay');
-        if (loader) loader.style.display = 'none';
-    }
-}
+        const searchType = document.getElementById('searchType') ? document.getElementById('searchType').value : 'inv';
+        const tbody = document.getElementById('trackingTableBody');
+        
+        if (!tbody || !window.DATA_MASTER || !window.DATA_MASTER.karpet) return;
+        tbody.innerHTML = "";
 
+        // 1. Tapis karpet aktif (Sembunyikan status SELESAI & SELESAI DIHANTAR)
+        let filtered = window.DATA_MASTER.karpet.filter(l => {
+            if (!l) return false;
+            const st = l["STATUS"] ? l["STATUS"].toString().trim().toUpperCase() : "";
+            if (st === "SELESAI" || st === "SELESAI DIHANTAR") return false;
+            
+            const order = window.DATA_MASTER.tempahan ? window.DATA_MASTER.tempahan.find(o => String(o["INV NO"]).trim() === String(l["INV NO"]).trim()) : {};
+            const cust = window.DATA_MASTER.pelanggan ? window.DATA_MASTER.pelanggan.find(c => String(c["CUSTOMER ID"]).trim() === String(order["CUSTOMER ID"]).trim()) : {};
+            
+            if (searchType === 'inv') {
+                return (l["INV NO"] || "").toString().toLowerCase().includes(kw) || (l["QR ID"] || "").toString().toLowerCase().includes(kw);
+            } else if (searchType === 'alamat') {
+                return (cust["ALAMAT"] || "").toString().toLowerCase().includes(kw);
+            }
+            return false;
+        });
 
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center; color: var(--text-muted);">Tiada hasil carian karpet yang aktif.</td></tr>';
+            return;
+        }
+
+        // Bersambung ke Bahagian 3 (Pembinaan jadual dan penutup fungsi)...
+filtered.reverse().forEach(k => {
+    const order = window.DATA_MASTER.tempahan ?
+        window.DATA_MASTER.tempahan.find(o => String(o["INV NO"]).trim() === String(k["INV NO"]).trim()) : {};
+    const cust = window.DATA_MASTER.pelanggan ?window.DATA_MASTER.pelanggan.find(c => String(c["CUSTOMER ID"]).trim() === String(order["CUSTOMER ID"]).trim()) : {};
+const namaPelanggan = cust["NAMA"] ? cust["NAMA"].toString().toUpperCase() : "TIADA DATA NAMA";
+    const alamatPelanggan = cust["ALAMAT"] ? cust["ALAMAT"].toString() : "-";
 function toggleSelectAllItems(master) { // Fungsi seterusnya sedia ada anda
 
 
