@@ -232,7 +232,9 @@
   <header>
     <div>
       <h1>Scan & Tracking System</h1>
-      <p> style="color: var(--text-muted);"]Carian pintar dan kemas kini status pukal</p>
+      <p style="color: var(--text-muted);">Carian pintar dan kemas kini status pukal</p>
+
+
     </div>
   </header>
   
@@ -372,7 +374,17 @@ bersihkanSelesaiDihantar();
         
         // 1. Tapis karpet aktif SAHAJA (Sembunyikan status SELESAI dan SELESAI DIHANTAR)
         let filtered = DATA_MASTER.karpet.filter(l => {
-            if (!l) return false;
+            if (!l) return false;let st = l.STATUS ? l.STATUS.toString().trim().toUpperCase() : "";
+            if (st === "SELESAI" || st === "SELESAI DIHANTAR") return false;
+            let order = DATA_MASTER.tempahan ? DATA_MASTER.tempahan.find(o => 
+                String(o.INV_NO).trim() === String(l.INV_NO).trim()) : {};
+            let cust = DATA_MASTER.pelanggan ? DATA_MASTER.pelanggan.find(c => 
+                String(c.CUSTOMER_ID).trim() === String(order.CUSTOMER_ID).trim()) : {};
+            if (searchType === "inv") {
+                return (l.INV_NO || "").toString().toLowerCase().includes(kw) || (l.QR_ID || "").toString().toLowerCase().includes(kw);
+            } else if (searchType === "alamat") {return (cust.ALAMAT || "").toString().toLowerCase().includes(kw);
+                                                }return false;
+        });
             
             // Ambil status dan bersihkan ruang kosong
             const st = l.STATUS ? l.STATUS.toString().trim().toUpperCase() : "";
