@@ -629,16 +629,15 @@ function addCarpetRow() {
             tbody.appendChild(tr);
         });
 
-  if (typeof updateCheckedCounter === "function") updateCheckedCounter();
-
-    } catch (error) 
+         if (typeof updateCheckedCounter === "function") updateCheckedCounter();
+    } catch (error) {
         console.error("Ralat dalam executeGlobalSearch:", error);
-    } finally { 
-        // Memaksa skrin loading ditutup walau apa pun yang terjadi
+    } finally {
         const loader = document.getElementById('loadingOverlay');
         if (loader) loader.style.display = 'none';
     }
-} );
+}
+
 
         function toggleSelectAllItems(master) { document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked); updateCheckedCounter(); }
         function updateCheckedCounter() { document.getElementById('checkedCountLabel').textContent = `${document.querySelectorAll('.row-checkbox:checked').length} item dipilih`; }
