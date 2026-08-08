@@ -620,7 +620,7 @@ function executeGlobalSearch() {
         if (!tbody || !window.DATA_MASTER || !window.DATA_MASTER.karpet) return;
         tbody.innerHTML = "";
 
-        // 1. Logik menapis karpet aktif (Sembunyikan status SELESAI & SELESAI DIHANTAR)
+        // 1. Tapis karpet aktif (Sembunyikan status SELESAI & SELESAI DIHANTAR)
         let filtered = window.DATA_MASTER.karpet.filter(l => {
             if (!l) return false;
             const st = l["STATUS"] ? l["STATUS"].toString().trim().toUpperCase() : "";
@@ -674,7 +674,6 @@ function executeGlobalSearch() {
         if (loader) loader.style.display = 'none';
     }
 }
-
 
         function toggleSelectAllItems(master) { document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked); updateCheckedCounter(); }
         function updateCheckedCounter() { document.getElementById('checkedCountLabel').textContent = `${document.querySelectorAll('.row-checkbox:checked').length} item dipilih`; }
