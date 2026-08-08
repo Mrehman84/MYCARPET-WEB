@@ -345,7 +345,11 @@ bersihkanSelesaiDihantar();
         populateCustomerDropdown();
         renderDashboardMetrics();
         renderDashboardTable();
-        
+
+    
+    // TAMBAHKAN BARIS INI DI SINI:
+    executeGlobalSearch();
+
         // Bersihkan borang perincian karpet dan muatkan dropdown produk
         document.getElementById('carpetItemsContainer').innerHTML = "";
         carpetRowCount = 0;
