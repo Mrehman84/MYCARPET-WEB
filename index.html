@@ -606,11 +606,12 @@ function addCarpetRow() {
             tbody.appendChild(tr);
         });
 
-        updateCheckedCounter(); 
+  if (typeof updateCheckedCounter === "function") updateCheckedCounter();
 
     } catch (error) { 
-        console.error("Ralat dalam search:", error);
+        console.error("Ralat dalam executeGlobalSearch:", error);
     } finally { 
+        // Memaksa skrin loading ditutup walau apa pun yang terjadi
         const loader = document.getElementById('loadingOverlay');
         if (loader) loader.style.display = 'none';
     }
