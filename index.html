@@ -316,7 +316,10 @@ function fetchDataDariAPI() {
         DATA_MASTER.pelanggan = response.pelanggan || [];
         DATA_MASTER.tempahan = response.tempahan || [];
         DATA_MASTER.karpet = response.karpet || [];
-
+ // LETAKKAN DI SINI SAHAJA (Paling Selamat):
+            setTimeout(() => {
+                executeGlobalSearch();
+            }, 500); 
         // Kemas kini komponen UI pada skrin aplikasi web
         populateCustomerDropdown();
         renderDashboardMetrics();
