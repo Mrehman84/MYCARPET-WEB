@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        /* ===== VARIABEL ===== */
+        /* ===== VARIABEL & RESET ===== */
         :root {
             --primary-red: #ff4b4b;
             --primary-dark: #1e1e2f;
@@ -194,18 +194,18 @@
         .status-pending { background: #fff3e0; color: #bf6000; border: 1px solid #ffb74d; }
         .status-paid { background: #e8f5e9; color: #1b5e20; border: 1px solid #81c784; }
 
-        /* ===== QR ===== */
+        /* ===== QR / BARCODE ===== */
         .qr-container {
-            display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;
+            display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start;
             margin-top: 16px;
         }
         .qr-item {
-            background: #fff; border: 1px solid var(--border-color); border-radius: 8px;
-            padding: 16px; text-align: center; width: 220px;
+            background: #fff; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 8px; text-align: center; width: 180px;
         }
-        .qr-item canvas, .qr-item img { display: block; margin: 0 auto 8px; }
-        .qr-item .qr-label { font-weight: 600; font-size: 13px; margin-top: 4px; word-break: break-all; }
-        .qr-item small { font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px; }
+        .qr-item canvas, .qr-item img { display: block; margin: 0 auto 6px; }
+        .qr-item .qr-label { font-weight: 600; font-size: 12px; margin-top: 2px; word-break: break-all; }
+        .qr-item small { font-size: 10px; color: var(--text-muted); display: block; margin-top: 2px; }
 
         /* ===== WHATSAPP PREVIEW ===== */
         .wa-preview {
@@ -243,14 +243,80 @@
             .btn { width: 100%; justify-content: center; }
             header h1 { font-size: 20px; }
         }
+
+        /* ===== CETAKAN BARCODE: 40mm x 30mm ===== */
         @media print {
-            body { display: block; background: #fff; }
-            aside, .mobile-menu, #loadingOverlay, .no-print { display: none !important; }
-            main { margin: 0; padding: 0; }
-            .tab-content { display: none !important; }
-            #invoice.active { display: block !important; }
-            .print-area { box-shadow: none; border: none; margin: 0; padding: 0; }
-            .btn, .no-print { display: none !important; }
+            /* Sembunyi semua kecuali barcode */
+            body * { visibility: hidden; }
+            #barcodePrintArea, #barcodePrintArea * { visibility: visible; }
+            #barcodePrintArea {
+                position: absolute; left: 0; top: 0; width: 100%;
+                margin: 0; padding: 0;
+            }
+            /* Saiz kertas 40mm x 30mm */
+            @page {
+                size: 40mm 30mm;
+                margin: 2mm;
+            }
+            .qr-item {
+                border: none !important;
+                padding: 2px !important;
+                width: auto !important;
+                display: inline-block !important;
+                page-break-inside: avoid;
+            }
+            .qr-item canvas {
+                width: 28mm !important;
+                height: 28mm !important;
+            }
+            .qr-item .qr-label {
+                font-size: 8px !important;
+            }
+            .qr-item small {
+                display: none !important;
+            }
+            /* Untuk cetakan biasa (invoice) */
+            .no-print { display: none !important; }
+        }
+
+        /* ===== Khas untuk cetakan barcode di skrin (preview) ===== */
+        #barcodePrintArea {
+            display: none;
+        }
+        #barcodePrintArea.active {
+            display: block;
+        }
+        .barcode-print-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: flex-start;
+            padding: 2mm;
+        }
+        .barcode-print-item {
+            width: 36mm;
+            height: 26mm;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            padding: 2mm;
+            text-align: center;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            page-break-inside: avoid;
+        }
+        .barcode-print-item canvas {
+            width: 22mm !important;
+            height: 22mm !important;
+        }
+        .barcode-print-item .label {
+            font-size: 6pt;
+            font-weight: 600;
+            margin-top: 1mm;
+            word-break: break-all;
+            line-height: 1.2;
         }
     </style>
 </head>
@@ -511,15 +577,20 @@
 
     <!-- ========================== 8. CETAK BARCODE ========================== -->
     <section id="barcode" class="tab-content">
-        <header><div><h1>🏷️ Cetak Barcode</h1><p class="muted">Jana QR code untuk setiap karpet dalam invois</p></div></header>
+        <header><div><h1>🏷️ Cetak Barcode</h1><p class="muted">Jana QR code saiz 40mm x 30mm untuk thermal printer</p></div></header>
         <div class="card">
             <div class="form-group">
                 <label>Pilih Invois</label>
                 <select id="barcodeInvoiceSelect" class="form-control" onchange="generateBarcodes()"><option value="">-- Pilih --</option></select>
             </div>
             <div id="barcodeContainer" class="qr-container"></div>
-            <button class="btn btn-secondary mt-16" onclick="printBarcodes()"><i class="fa-solid fa-print"></i> Cetak Barcode</button>
+            <div class="flex mt-16">
+                <button class="btn btn-primary" onclick="previewBarcodePrint()"><i class="fa-solid fa-eye"></i> Preview Cetakan</button>
+                <button class="btn btn-secondary" onclick="printBarcodes()"><i class="fa-solid fa-print"></i> Cetak / Simpan PDF (40x30mm)</button>
+            </div>
         </div>
+        <!-- Kawasan cetakan barcode (tersembunyi sehingga preview) -->
+        <div id="barcodePrintArea" class="card"></div>
     </section>
 
     <!-- ========================== 9. KEWANGAN ========================== -->
@@ -555,7 +626,7 @@
 const CONFIG = {
     GAS_API_URL: "https://script.google.com/macros/s/AKfycbyDZGqIqcloW_acpOe7MOYRHvG4neZK0oRiUP5-Cqq8K1oR2-RYOw-Icp6bBRL5yzX3/exec",
     ACTIVE_STATUSES: ["DALAM PROSES", "PENGERINGAN", "READY TO DELIVER", "SELESAI DIHANTAR"],
-    LOGO_URL: "https://raw.githubusercontent.com/Mrehman84/MYCARPET_PRO/main/logo_westberry.png" // Ganti dengan URL sebenar logo anda
+    LOGO_URL: "https://raw.githubusercontent.com/Mrehman84/MYCARPET_PRO/main/logo_westberry.png"
 };
 
 let STATE = {
@@ -690,7 +761,7 @@ function cleanupJsonp(name) {
 async function postData(data) {
     showLoading(true);
     try {
-        const resp = await fetch(CONFIG.GAS_API_URL, {
+        await fetch(CONFIG.GAS_API_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
@@ -834,7 +905,6 @@ function hantarWhatsAppJanji() {
         alert('Sila masukkan nombor telefon pelanggan.');
         return;
     }
-    // Dapatkan mesej dari preview
     const preview = document.getElementById('mesejPreview');
     let msg = preview.textContent;
     if (!msg || preview.classList.contains('hidden')) {
@@ -906,7 +976,6 @@ function buildPriceOptions(select) {
         opt._mycarpet = { kod, jenis, lebar, panjang, hargaSqft, harga, luas };
         select.appendChild(opt);
     });
-    // Add CUSTOM if not exists
     if (!STATE.senaraiHarga.some(p => normalize(getField(p,['KOD'])) === 'CUSTOM')) {
         const opt = document.createElement('option');
         opt.value = 'CUSTOM';
@@ -935,7 +1004,6 @@ function addCarpetRow() {
     div.id = rowId;
     div.style.cssText = 'padding:12px;background:#fcfcfc;border:1px solid #edf2f7;border-radius:8px;margin-bottom:12px;';
 
-    // Kod
     const col1 = document.createElement('div');
     col1.className = 'col form-group';
     col1.style.flex = '1.7';
@@ -949,7 +1017,6 @@ function addCarpetRow() {
     info.textContent = 'Jenis & harga auto.';
     col1.append(lbl1, sel, info);
 
-    // Qty
     const col2 = document.createElement('div');
     col2.className = 'col form-group';
     col2.style.maxWidth = '100px';
@@ -960,7 +1027,6 @@ function addCarpetRow() {
     qty.oninput = calculateGrandTotal;
     col2.append(lbl2, qty);
 
-    // Custom dims
     const col3 = document.createElement('div');
     col3.className = 'col form-group sub-custom-dimensions';
     col3.style.cssText = 'display:none;max-width:220px';
@@ -975,7 +1041,6 @@ function addCarpetRow() {
     wrap.append(w, x, h);
     col3.append(lbl3, wrap);
 
-    // Harga
     const col4 = document.createElement('div');
     col4.className = 'col form-group';
     col4.style.maxWidth = '140px';
@@ -987,7 +1052,6 @@ function addCarpetRow() {
     price.oninput = calculateGrandTotal;
     col4.append(lbl4, price);
 
-    // Delete
     const col5 = document.createElement('div');
     col5.style.cssText = 'display:flex;align-items:center;margin-top:5px';
     const del = document.createElement('button');
@@ -1109,7 +1173,6 @@ async function simpanTempahan() {
         const today = getToday();
         const tarikhSiap = addDays(today, 7);
 
-        // Simpan ke Google Sheets
         await postData({
             action: 'createOrder',
             isNewCustomer: isNew,
@@ -1117,7 +1180,6 @@ async function simpanTempahan() {
             items: items
         });
 
-        // Simpan untuk WhatsApp
         STATE.lastOrderCustomer = customer;
         STATE.lastOrderMessage = {
             invNo: 'INV' + Date.now().toString().slice(-7),
@@ -1128,7 +1190,6 @@ async function simpanTempahan() {
             customer: customer
         };
 
-        // Preview WhatsApp
         const msg = binaMesejTempahan(STATE.lastOrderMessage);
         const preview = document.getElementById('tempahanPreview');
         preview.textContent = msg;
@@ -1386,7 +1447,7 @@ async function rekodBayaran() {
 }
 
 // ============================================================
-// 6. INVOIS & RESIT
+// 6. INVOIS & RESIT (DIPERBAIKI - TIADA RALAT TEMPLATE LITERAL)
 // ============================================================
 function populateInvoiceDropdown() {
     const sel = document.getElementById('invoiceSelect');
@@ -1446,10 +1507,10 @@ function getDeposit(inv) {
 function getInvoiceStatus(inv) {
     const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv));
     if (!order) return 'PENDING';
-    const status = normalize(getField(order, ['STATUS'], 'PENDING'));
-    return status;
+    return normalize(getField(order, ['STATUS'], 'PENDING'));
 }
 
+// RENDER INVOICE - VERSI BETUL (GUNA CONCATENATION, BUKAN TEMPLATE LITERAL)
 function renderInvoice() {
     var container = document.getElementById('invoicePreviewContainer');
     var inv = document.getElementById('invoiceSelect').value;
@@ -1518,7 +1579,7 @@ function renderInvoice() {
         rows += extraRow;
     }
 
-    // Mulakan bina HTML menggunakan concatenation
+    // Bina HTML menggunakan concatenation (selamat)
     var html = '';
     html += '<div class="card print-area">';
     html += '<div class="invoice-preview">';
@@ -1570,59 +1631,6 @@ function renderInvoice() {
     html += '</div>'; // tutup card
 
     container.innerHTML = html;
-}
-    html += '</div>';
-
-    html += '<table class="invoice-table"><thead><tr><th>No.</th><th>Perincian</th><th>Qty</th><th>Harga</th><th>Jumlah</th></tr></thead><tbody>' + rows + '</tbody></table>';
-
-    html += '<div class="invoice-total">';
-    html += '<div><span>Sub Jumlah</span><strong>' + formatMoney(subtotal) + '</strong></div>';
-    if (extraPrice > 0) {
-        html += '<div><span>Servis Tambahan</span><strong>' + formatMoney(extraPrice) + '</strong></div>';
-    }
-    html += '<div><span>Jumlah Keseluruhan</span><strong>' + formatMoney(total) + '</strong></div>';
-    html += '<div><span>Deposit</span><strong>' + formatMoney(deposit) + '</strong></div>';
-    html += '<div class="grand"><span>BAKI</span><strong style="color:' + (isPaid ? 'var(--green)' : 'var(--orange)') + '">' + formatMoney(baki) + '</strong></div>';
-    html += '</div>';
-
-    html += '<div style="margin-top:35px;padding-top:15px;border-top:1px solid #ddd;text-align:center;font-size:12px;color:#777;">Terima kasih menggunakan MYCARPET PRO.</div>';
-    html += '</div>'; // tutup invoice-preview
-    html += '</div>'; // tutup card
-
-    container.innerHTML = html;
-}
-    <div class="card print-area">
-        <div class="invoice-preview">
-            <div class="invoice-head">
-                <div style="display:flex;align-items:center;gap:16px;">
-                    <img src="${https://github.com/Mrehman84/MYCARPET_PRO/blob/main/logo_westberry.png}" alt="Logo Westberry" style="height:60px;object-fit:contain;" onerror="this.style.display='none'">
-                    <div>
-                        <div class="invoice-title">MYCARPET PRO</div>
-                        <div class="muted">Perkhidmatan Cucian Karpet</div>
-                    </div>
-                </div>
-                <div style="text-align:right">
-                    <div style="font-size:22px;font-weight:700">INVOIS / RESIT</div>
-                    <div><strong>${escapeHtml(inv)}</strong></div>
-                    <div class="muted">Tarikh: ${escapeHtml(formatDateMY(tarikh))}</div>
-                    <div class="mt-16"><span class="status-badge ${statusClass}">${statusText}</span></div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col"><strong>PELANGGAN</strong><br>${escapeHtml(nama)}<br>${escapeHtml(telefon)}<br>${escapeHtml(alamat)}<br>${escapeHtml(daerah)}</div>
-                <div class="col"><strong>STATUS BAYARAN</strong><br>Jumlah: <strong>${formatMoney(total)}</strong><br>Deposit: <strong>${formatMoney(deposit)}</strong><br>Baki: <strong style="color:${isPaid ? 'var(--green)' : 'var(--orange)'}">${formatMoney(baki)}</strong></div>
-            </div>
-            <table class="invoice-table"><thead><tr><th>No.</th><th>Perincian</th><th>Qty</th><th>Harga</th><th>Jumlah</th></tr></thead><tbody>${rows}</tbody></table>
-            <div class="invoice-total">
-                <div><span>Sub Jumlah</span><strong>${formatMoney(subtotal)}</strong></div>
-                ${extraPrice>0 ? `<div><span>Servis Tambahan</span><strong>${formatMoney(extraPrice)}</strong></div>` : ''}
-                <div><span>Jumlah Keseluruhan</span><strong>${formatMoney(total)}</strong></div>
-                <div><span>Deposit</span><strong>${formatMoney(deposit)}</strong></div>
-                <div class="grand"><span>BAKI</span><strong style="color:${isPaid ? 'var(--green)' : 'var(--orange)'}">${formatMoney(baki)}</strong></div>
-            </div>
-            <div style="margin-top:35px;padding-top:15px;border-top:1px solid #ddd;text-align:center;font-size:12px;color:#777;">Terima kasih menggunakan MYCARPET PRO.</div>
-        </div>
-    </div>`;
 }
 
 function printInvoice() {
@@ -1684,18 +1692,17 @@ function hantarWhatsAppInvoice() {
     const status = getInvoiceStatus(inv);
     const isPaid = status === 'PAID' || status === 'LUNAS' || status === 'SELESAI';
 
-    let msg = `Salam *${nama}*, ini adalah maklumat baki invois rasmi dari MYCARPET PRO.
-
-🧾 *No. Invois:* ${inv}
-💰 *Jumlah Keseluruhan:* ${formatMoney(total)}`;
+    let msg = 'Salam *' + nama + '*, ini adalah maklumat baki invois rasmi dari MYCARPET PRO.\n\n';
+    msg += '🧾 *No. Invois:* ' + inv + '\n';
+    msg += '💰 *Jumlah Keseluruhan:* ' + formatMoney(total) + '\n';
     if (isPaid) {
-        msg += `\n✅ *Status:* LUNAS (PAID)`;
+        msg += '✅ *Status:* LUNAS (PAID)\n';
     } else {
-        msg += `\n💳 *Baki Perlu Dibayar:* ${formatMoney(baki)}`;
+        msg += '💳 *Baki Perlu Dibayar:* ' + formatMoney(baki) + '\n';
     }
-    msg += `\n\nSila hubungi kami untuk sebarang pertanyaan. Terima kasih! 🙏`;
+    msg += '\nSila hubungi kami untuk sebarang pertanyaan. Terima kasih! 🙏';
 
-    const url = `https://wa.me/60${telefon.replace(/^0+/, '')}?text=${encodeURIComponent(msg)}`;
+    const url = 'https://wa.me/60' + telefon.replace(/^0+/, '') + '?text=' + encodeURIComponent(msg);
     window.open(url, '_blank');
 }
 
@@ -1740,8 +1747,7 @@ async function kemaskiniHargaPukal() {
         return;
     }
 
-    const confirmMsg = `Anda akan kemaskini SEMUA rekod dengan kod "${kod}" kepada harga per SQFT RM${hargaSqft.toFixed(2)}. Teruskan?`;
-    if (!confirm(confirmMsg)) return;
+    if (!confirm('Anda akan kemaskini SEMUA rekod dengan kod "' + kod + '" kepada harga per SQFT RM' + hargaSqft.toFixed(2) + '. Teruskan?')) return;
 
     try {
         await postData({
@@ -1749,7 +1755,7 @@ async function kemaskiniHargaPukal() {
             kod: kod,
             hargaSqft: hargaSqft
         });
-        alert(`Harga untuk semua kod "${kod}" berjaya dikemas kini.`);
+        alert('Harga untuk semua kod "' + kod + '" berjaya dikemas kini.');
         document.getElementById('hargaSqftInput').value = '';
         await fetchData();
         renderHargaTable();
@@ -1759,7 +1765,7 @@ async function kemaskiniHargaPukal() {
 }
 
 // ============================================================
-// 8. BARCODE
+// 8. BARCODE (DENGAN SAIZ 40mm x 30mm)
 // ============================================================
 function populateBarcodeDropdown() {
     const sel = document.getElementById('barcodeInvoiceSelect');
@@ -1783,12 +1789,17 @@ function generateBarcodes() {
     const container = document.getElementById('barcodeContainer');
     container.innerHTML = '';
     const inv = document.getElementById('barcodeInvoiceSelect').value;
-    if (!inv) { container.innerHTML = '<p class="muted">Sila pilih invois.</p>'; return; }
+    if (!inv) {
+        container.innerHTML = '<p class="muted">Sila pilih invois.</p>';
+        return;
+    }
 
     const items = STATE.karpet.filter(k => normalize(getField(k, ['INV NO','INV_NO','NO INVOIS'])) === normalize(inv));
-    if (!items.length) { container.innerHTML = '<p class="muted">Tiada karpet untuk invois ini.</p>'; return; }
+    if (!items.length) {
+        container.innerHTML = '<p class="muted">Tiada karpet untuk invois ini.</p>';
+        return;
+    }
 
-    // Get customer info
     const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) || {};
     const cust = STATE.pelanggan.find(c => String(getField(c,['CUSTOMER ID','CUSTOMER_ID'])).trim() === String(getField(order,['CUSTOMER ID','CUSTOMER_ID'])).trim()) || {};
     const alamat = getField(cust, ['ALAMAT'], '');
@@ -1803,8 +1814,7 @@ function generateBarcodes() {
         canvas.id = 'qr_'+qr.replace(/[^a-zA-Z0-9]/g,'_');
         div.appendChild(canvas);
 
-        // QR text: QR ID, Alamat, Telefon
-        const qrText = `QR ID: ${qr}\nAlamat: ${alamat}\nTelefon: ${telefon}`;
+        const qrText = 'QR ID: ' + qr + '\nAlamat: ' + alamat + '\nTelefon: ' + telefon;
         const label = document.createElement('div');
         label.className = 'qr-label';
         label.textContent = qr;
@@ -1815,7 +1825,7 @@ function generateBarcodes() {
 
         container.appendChild(div);
 
-        setTimeout(() => {
+        setTimeout(function() {
             try {
                 new QRCode(canvas, {
                     text: qrText,
@@ -1833,8 +1843,91 @@ function generateBarcodes() {
     });
 }
 
+// Preview cetakan barcode dalam saiz 40mm x 30mm
+function previewBarcodePrint() {
+    const inv = document.getElementById('barcodeInvoiceSelect').value;
+    if (!inv) {
+        alert('Sila pilih invois dahulu.');
+        return;
+    }
+
+    const printArea = document.getElementById('barcodePrintArea');
+    printArea.innerHTML = '';
+    printArea.classList.add('active');
+
+    const items = STATE.karpet.filter(k => normalize(getField(k, ['INV NO','INV_NO','NO INVOIS'])) === normalize(inv));
+    if (!items.length) {
+        printArea.innerHTML = '<p class="muted">Tiada karpet untuk invois ini.</p>';
+        return;
+    }
+
+    const order = STATE.tempahan.find(o => normalize(getField(o,['INV NO','INV_NO','NO INVOIS'])) === normalize(inv)) || {};
+    const cust = STATE.pelanggan.find(c => String(getField(c,['CUSTOMER ID','CUSTOMER_ID'])).trim() === String(getField(order,['CUSTOMER ID','CUSTOMER_ID'])).trim()) || {};
+    const alamat = getField(cust, ['ALAMAT'], '');
+    const telefon = getField(cust, ['TELEFON','NO TELEFON'], '');
+
+    // Buat grid untuk cetakan
+    var grid = document.createElement('div');
+    grid.className = 'barcode-print-grid';
+    grid.id = 'barcodePrintGrid';
+
+    items.forEach(function(k) {
+        const qr = String(getField(k, ['QR ID','QR_ID'])).trim();
+        if (!qr) return;
+
+        var itemDiv = document.createElement('div');
+        itemDiv.className = 'barcode-print-item';
+
+        var canvasDiv = document.createElement('div');
+        canvasDiv.id = 'print_qr_' + qr.replace(/[^a-zA-Z0-9]/g,'_');
+        itemDiv.appendChild(canvasDiv);
+
+        var label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = qr;
+        itemDiv.appendChild(label);
+
+        grid.appendChild(itemDiv);
+
+        // Generate QR
+        setTimeout(function() {
+            try {
+                new QRCode(canvasDiv, {
+                    text: 'QR ID: ' + qr + '\nAlamat: ' + alamat + '\nTelefon: ' + telefon,
+                    width: 80,
+                    height: 80,
+                    colorDark: "#000",
+                    colorLight: "#fff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch(e) {
+                canvasDiv.textContent = 'QR Error';
+                console.error(e);
+            }
+        }, 100);
+    });
+
+    printArea.appendChild(grid);
+
+    // Skrol ke area print
+    printArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Cetak barcode – gunakan window.print() dengan CSS khas untuk saiz 40mm x 30mm
 function printBarcodes() {
-    window.print();
+    const inv = document.getElementById('barcodeInvoiceSelect').value;
+    if (!inv) {
+        alert('Sila pilih invois dahulu.');
+        return;
+    }
+
+    // Pastikan preview dijana dulu
+    previewBarcodePrint();
+
+    // Tunggu QR code siap, kemudian cetak
+    setTimeout(function() {
+        window.print();
+    }, 500);
 }
 
 // ============================================================
@@ -1847,7 +1940,7 @@ function renderLejar() {
     STATE.payment.forEach(p => {
         all.push({
             tarikh: getField(p, ['TARIKH','DATE'], getToday()),
-            penerangan: `Bayaran invois ${getField(p, ['INV NO','INV_NO','NO INVOIS'],'')}`,
+            penerangan: 'Bayaran invois ' + getField(p, ['INV NO','INV_NO','NO INVOIS'], ''),
             jenis: 'Pendapatan',
             jumlah: getNumber(getField(p, ['AMAUN DIBAYAR','AMOUNT']))
         });
@@ -1902,7 +1995,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('paymentInvoiceSelect').addEventListener('change', loadPaymentData);
     document.getElementById('barcodeInvoiceSelect').addEventListener('change', generateBarcodes);
 
-    // Set today's date for appointment
     const tjTarikh = document.getElementById('tjTarikh');
     if (tjTarikh) tjTarikh.value = getToday();
 
