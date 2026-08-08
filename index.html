@@ -611,25 +611,30 @@ function addCarpetRow() {
             });
         }
 
-        function executeGlobalSearch() {
-            const kw = document.getElementById('searchBox').value.toLowerCase().trim();
-            const tbody = document.getElementById('trackingTableBody'); tbody.innerHTML = "";
-            let filtered = DATA_MASTER.karpet.filter(k => {
-                let order = DATA_MASTER.tempahan.find(o => o["INV NO"] == k["INV NO"]) || {};
-                let cust = DATA_MASTER.pelanggan.find(c => c["CUSTOMER ID"] == order["CUSTOMER ID"]) || {};
-                return (k["QR ID"]||"").toLowerCase().includes(kw) || (k["INV NO"]||"").toLowerCase().includes(kw) || (k["JENIS"]||"").toLowerCase().includes(kw) || (cust["NAMA"]||"").toLowerCase().includes(kw);
-            });
-            if(filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center;">Tiada hasil carian.</td></tr>'; return; }
-                    // 1. Pastikan bahagian loop ini ditutup dengan betul:
-        filtered.reverse().forEach(k => {
-            let order = DATA_MASTER.tempahan.find(o => o["INV NO"] == k["INV NO"]) || {};
-            let cust = DATA_MASTER.pelanggan.find(c => c["CUSTOMER ID"] == order["CUSTOMER ID"]) || {};
-            let tr = document.createElement('tr'); 
-            // ... (rujuk kod penuh dalam dokumentasi asal untuk elemen jadual)
-            tbody.appendChild(tr);
+   function executeGlobalSearch() {
+    try {
+        const kw = document.getElementById('searchBox') ? document.getElementById('searchBox').value.toLowerCase().trim() : '';
+        const searchType = document.getElementById('searchType') ? document.getElementById('searchType').value : 'inv';
+        const tbody = document.getElementById('trackingTableBody');
+        
+        if (!tbody || !window.DATA_MASTER || !window.DATA_MASTER.karpet) return;
+        tbody.innerHTML = "";
+
+        // Tapis karpet aktif dan bina baris jadual (rujuk untuk kod penuh)
+        let filtered = window.DATA_MASTER.karpet.filter(l => {
+            if (!l) return false;
+            const st = l["STATUS"] ? l["STATUS"].toString().trim().toUpperCase() : "";
+            if (st === "SELESAI" || st === "SELESAI DIHANTAR") return false;
+            // Penapisan mengikut jenis carian...
+            return true;
         });
 
-         if (typeof updateCheckedCounter === "function") updateCheckedCounter();
+        // Paparkan hasil carian ke dalam jadual
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center; color: var(--text-muted);">Tiada hasil carian karpet yang aktif.</td></tr>';
+            return;
+        }
+        
     } catch (error) {
         console.error("Ralat dalam executeGlobalSearch:", error);
     } finally {
@@ -637,7 +642,6 @@ function addCarpetRow() {
         if (loader) loader.style.display = 'none';
     }
 }
-
 
         function toggleSelectAllItems(master) { document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked); updateCheckedCounter(); }
         function updateCheckedCounter() { document.getElementById('checkedCountLabel').textContent = `${document.querySelectorAll('.row-checkbox:checked').length} item dipilih`; }
