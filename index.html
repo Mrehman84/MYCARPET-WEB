@@ -1491,51 +1491,86 @@ function renderInvoice() {
     var total = subtotal + extraPrice;
     var baki = Math.max(0, total - deposit);
 
-    // Bina rows guna concatenation biasa (selamat)
     var rows = '';
     items.forEach(function(item, i) {
-        rows += '<tr>';
-        rows += '<td>' + (i + 1) + '</td>';
-        rows += '<td>' + escapeHtml(item.nama);
+        var itemRow = '<tr>';
+        itemRow += '<td>' + (i + 1) + '</td>';
+        itemRow += '<td>' + escapeHtml(item.nama);
         if (item.qr) {
-            rows += '<br><small>QR: ' + escapeHtml(item.qr) + '</small>';
+            itemRow += '<br><small>QR: ' + escapeHtml(item.qr) + '</small>';
         }
-        rows += '</td>';
-        rows += '<td>' + item.qty + '</td>';
-        rows += '<td>' + formatMoney(item.harga) + '</td>';
-        rows += '<td>' + formatMoney(item.total) + '</td>';
-        rows += '</tr>';
+        itemRow += '</td>';
+        itemRow += '<td>' + item.qty + '</td>';
+        itemRow += '<td>' + formatMoney(item.harga) + '</td>';
+        itemRow += '<td>' + formatMoney(item.total) + '</td>';
+        itemRow += '</tr>';
+        rows += itemRow;
     });
+
     if (extraName && extraPrice > 0) {
-        rows += '<tr>';
-        rows += '<td>' + (items.length + 1) + '</td>';
-        rows += '<td>' + escapeHtml(extraName.toUpperCase()) + ' (TAMBAHAN)</td>';
-        rows += '<td>1</td>';
-        rows += '<td>' + formatMoney(extraPrice) + '</td>';
-        rows += '<td>' + formatMoney(extraPrice) + '</td>';
-        rows += '</tr>';
+        var extraRow = '<tr>';
+        extraRow += '<td>' + (items.length + 1) + '</td>';
+        extraRow += '<td>' + escapeHtml(extraName.toUpperCase()) + ' (TAMBAHAN)</td>';
+        extraRow += '<td>1</td>';
+        extraRow += '<td>' + formatMoney(extraPrice) + '</td>';
+        extraRow += '<td>' + formatMoney(extraPrice) + '</td>';
+        extraRow += '</tr>';
+        rows += extraRow;
     }
 
-    // Bina HTML guna concatenation biasa (selamat)
-    var logoUrl = 'https://raw.githubusercontent.com/Mrehman84/MYCARPET_PRO/main/logo_westberry.png';
-    var html = '<div class="card print-area">';
+    // Mulakan bina HTML menggunakan concatenation
+    var html = '';
+    html += '<div class="card print-area">';
     html += '<div class="invoice-preview">';
+
+    // HEADER
     html += '<div class="invoice-head">';
     html += '<div style="display:flex;align-items:center;gap:16px;">';
-    html += '<img src="' + logoUrl + '" alt="Logo Westberry" style="height:60px;object-fit:contain;" onerror="this.style.display=\'none\'">';
-    html += '<div><div class="invoice-title">MYCARPET PRO</div><div class="muted">Perkhidmatan Cucian Karpet</div></div>';
+    html += '<img src="' + CONFIG.LOGO_URL + '" alt="Logo Westberry" style="height:60px;object-fit:contain;" onerror="this.style.display=\'none\'">';
+    html += '<div>';
+    html += '<div class="invoice-title">MYCARPET PRO</div>';
+    html += '<div class="muted">Perkhidmatan Cucian Karpet</div>';
     html += '</div>';
-    html += '<div style="text-align:right">';
-    html += '<div style="font-size:22px;font-weight:700">INVOIS / RESIT</div>';
+    html += '</div>';
+    html += '<div style="text-align:right;">';
+    html += '<div style="font-size:22px;font-weight:700;">INVOIS / RESIT</div>';
     html += '<div><strong>' + escapeHtml(inv) + '</strong></div>';
     html += '<div class="muted">Tarikh: ' + escapeHtml(formatDateMY(tarikh)) + '</div>';
     html += '<div class="mt-16"><span class="status-badge ' + statusClass + '">' + statusText + '</span></div>';
     html += '</div>';
     html += '</div>'; // tutup invoice-head
 
+    // MAKLUMAT PELANGGAN & BAYARAN
     html += '<div class="row">';
     html += '<div class="col"><strong>PELANGGAN</strong><br>' + escapeHtml(nama) + '<br>' + escapeHtml(telefon) + '<br>' + escapeHtml(alamat) + '<br>' + escapeHtml(daerah) + '</div>';
-    html += '<div class="col"><strong>STATUS BAYARAN</strong><br>Jumlah: <strong>' + formatMoney(total) + '</strong><br>Deposit: <strong>' + formatMoney(deposit) + '</strong><br>Baki: <strong style="color:' + (isPaid ? 'var(--green)' : 'var(--orange)') + '">' + formatMoney(baki) + '</strong></div>';
+    html += '<div class="col"><strong>STATUS BAYARAN</strong><br>Jumlah: <strong>' + formatMoney(total) + '</strong><br>Deposit: <strong>' + formatMoney(deposit) + '</strong><br>Baki: <strong style="color:' + (isPaid ? 'var(--green)' : 'var(--orange)') + ';">' + formatMoney(baki) + '</strong></div>';
+    html += '</div>';
+
+    // JADUAL ITEMS
+    html += '<table class="invoice-table">';
+    html += '<thead><tr><th>No.</th><th>Perincian</th><th>Qty</th><th>Harga</th><th>Jumlah</th></tr></thead>';
+    html += '<tbody>' + rows + '</tbody>';
+    html += '</table>';
+
+    // TOTAL
+    html += '<div class="invoice-total">';
+    html += '<div><span>Sub Jumlah</span><strong>' + formatMoney(subtotal) + '</strong></div>';
+    if (extraPrice > 0) {
+        html += '<div><span>Servis Tambahan</span><strong>' + formatMoney(extraPrice) + '</strong></div>';
+    }
+    html += '<div><span>Jumlah Keseluruhan</span><strong>' + formatMoney(total) + '</strong></div>';
+    html += '<div><span>Deposit</span><strong>' + formatMoney(deposit) + '</strong></div>';
+    html += '<div class="grand"><span>BAKI</span><strong style="color:' + (isPaid ? 'var(--green)' : 'var(--orange)') + ';">' + formatMoney(baki) + '</strong></div>';
+    html += '</div>';
+
+    // FOOTER
+    html += '<div style="margin-top:35px;padding-top:15px;border-top:1px solid #ddd;text-align:center;font-size:12px;color:#777;">Terima kasih menggunakan MYCARPET PRO.</div>';
+
+    html += '</div>'; // tutup invoice-preview
+    html += '</div>'; // tutup card
+
+    container.innerHTML = html;
+}
     html += '</div>';
 
     html += '<table class="invoice-table"><thead><tr><th>No.</th><th>Perincian</th><th>Qty</th><th>Harga</th><th>Jumlah</th></tr></thead><tbody>' + rows + '</tbody></table>';
