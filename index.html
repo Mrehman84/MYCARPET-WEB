@@ -638,7 +638,7 @@ function addCarpetRow() {
         const loader = document.getElementById('loadingOverlay');
         if (loader) loader.style.display = 'none';
     }
-} 
+} );
 
         function toggleSelectAllItems(master) { document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked); updateCheckedCounter(); }
         function updateCheckedCounter() { document.getElementById('checkedCountLabel').textContent = `${document.querySelectorAll('.row-checkbox:checked').length} item dipilih`; }
